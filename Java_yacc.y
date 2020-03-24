@@ -1,3 +1,8 @@
+//SAMPLES FOR JAVA
+//https://www.cs.utexas.edu/~scottm/cs307/codingSamples.htm
+
+
+
 %{
 	#include <stdio.h>
 	#include <string.h>
