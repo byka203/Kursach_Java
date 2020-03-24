@@ -16,7 +16,7 @@ class							return T_CLASS;
 const							return T_CONST;
 continue						return T_CONTINUE;
 default							return T_DEFAULT;
-do								return T_DO;
+do							return T_DO;
 double							return T_DOUBLE;
 else							return T_ELSE;
 enum							return T_ENUM;
