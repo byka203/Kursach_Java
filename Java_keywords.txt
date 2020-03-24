@@ -48,3 +48,49 @@ try — оператор обработки исключений;
 void — метод не возвращает значений;
 volatile — поле доступно нескольким потокам;
 while — тип цикла.
+
+
+
+Директивы:
+	import
+	package
+
+типы данных:
+	byte
+	char
+	double
+	float
+	int
+	long
+	short
+	boolean
+	String
+
+тип переменных:
+	var
+
+тип метода:
+	void
+
+модификаторы доступа:
+	public
+	private
+	protected
+
+Модификаторы класса:
+	static
+	final
+	abstract
+
+Модификаторы метода:
+	static
+	final
+	abstract
+
+Модификаторы переменной:
+	static
+	final
+
+Модификаторы потока:
+	synchronized
+	volatile

@@ -1,73 +1,91 @@
 %{
 	#include <stdio.h>
 	#include "y.tab.h"
+	extern int number_str;
+
 %}
 
 %%
-abstract						return T_ABSTRACT;
-assert							return T_ASSERT;
-boolean							return T_BOOLEAN;
-break							return T_BREAK;
-byte							return T_BYTE;
-case							return T_CASE;
-catch							return T_CATCH;
-char							return T_CHAR;
-class							return T_CLASS;
-const							return T_CONST;
-continue						return T_CONTINUE;
-default							return T_DEFAULT;
-do							return T_DO;
-double							return T_DOUBLE;
-else							return T_ELSE;
-enum							return T_ENUM;
-extends							return T_EXTENDS;
-final							return T_FINAL;
-finally							return T_FINALLY;
-float							return T_FLOAT;
-for								return T_FOR;
-goto							return T_GOTO;
-if								return T_IF;
-implements						return T_IMPLEMENTS;
-import							return T_IMPORT;
-instaceof						return T_INSTACEOF;
-int								return T_INT;
-interface						return T_INTERFACE;
-long							return T_LONG;
-native							return T_NATIVE;
-new								return T_NEW;
-package							return T_PACKAGE;
-private							return T_PRIVATE;
-protected						return T_PROTECTED;
-public							return T_PUBLIC;
-return							return T_RETURN;
-short							return T_SHORT;
-static							return T_STATIC;
-strictfp						return T_STRICTFP;
-super							return T_SUPER;
-switch							return T_SWITCH;
-synchronized					return T_SYNCHRONIZED;
-this							return T_THIS;
-throw							return T_THROW;
-throws							return T_THROWS;
-transient						return T_TRANSIENT;
-try								return T_TRY;
-void							return T_VOID;
-volatile						return T_VOLATILE;
-while							return T_WHILE;
-[a-zA-Z_][a-zA-Z0-9_]*			return T_VAR;
-[0-9]+ 							return T_NUMBER;
-"++"|"--"						return T_INCDEC;
-"+="|"-="|"*="|"/="|"%="|"="	return T_ASSIGN;
-"+"|"-"							return T_UNOP;
-"*"|"/"|"&"|"|"|">>"|"<<"		return T_OP;
-">"|"<"|"=="|">="|"<="|"!="		return T_COMP;
-"&&"							return T_AND;
-"||"							return T_OR;
-\(								return T_OPEN;
-\)								return T_CLOSE;
-\{								return T_OBRACE;
-\}								return T_EBRACE;
-\;								return T_SEMICOLON;
-(\r\n)|\n 						yylval++;
-[ \t]+
+"import"|"package"		return T_DIRECTIVE;
+
+"class"			return T_CLASS;
+"interface"		return T_INTERFACE;
+
+"byte"|"boolean"|"char"|"double"|"float"|"int"|"long"|"short"|"String"	return T_DATA_TYPE;
+"var"																	return T_DATA_TYPE_VARAIBLE;
+"void"																	return T_DATA_TYPE_METHOD;
+
+"enum"		return T_ENUM;
+
+"public"|"private"|"protected"		return T_ACCESS_MODIFIERS;
+
+"static"|"final"				return T_VARAIBLE_CLASS_METHOD_MODIFIERS;
+"abstract"						return T_CLASS_METHOD_MODIFIERS;
+"transient"						return T_VARAIBLE_MODIFIERS;
+"native"						return T_METHOD_MODIFIERS;
+"strictfp"						return T_CLASS_MODIFIERS;
+"synchronized"|"volatile"		return T_STREAM_MODIFIERS;
+
+"extends"			return T_EXTENDS;
+"implements"		return T_IMPLEMENTS;
+"throw"				return T_THROW;
+
+"true"|"false"		return T_TRUE_FALSE;
+
+"if"		return T_IF;
+"else"		return T_ELSE;
+
+"switch"		return T_SWITCH;
+"case"			return T_CASE;
+"default"		return T_DEFAULT;
+
+"try"			return T_TRY;
+"catch"			return T_CATCH;
+"throws"		return T_THROWS;
+"finally"		return T_FINALLY;
+
+"for"		return T_FOR;
+"do"		return T_DO;
+"while"		return T_WHILE;
+
+"break"			return T_BREAK;
+"continue"		return T_CONTINUE;
+
+
+"new"		return T_NEW;
+
+"super"		return T_SUPER;
+"this"		return T_THIS;
+
+"assert"		return T_ASSERT;
+"instaceof"		return T_INSTACEOF;
+"return"		return T_RETURN;
+
+"++"|"--"											return T_INCREMENT_DECREMENT_SIGN;
+"~"|"!"												return T_UNARY_SIGN_ONLY;
+"+"|"-"												return T_UNARY_SIGN;
+"=="|"!="|">="|"<="|">"|"<"							return T_COMPARISON_SIGN;
+"*"|"/"|"%"|"&"|"|"|"^"|"<<"|">>"|">>>"|"&&"|"||"	return T_BINARY_SIGN;
+"="													return T_ASSIGNMENT;
+
+"("		return T_OPEN_BRACKET;
+")"		return T_CLOSE_BRACKET;
+"["		return T_OPEN_SQUARE_BRACKET;
+"]"		return T_CLOSE_SQUARE_BRACKET;
+"{"		return T_OPEN_BRACE;
+"}"		return T_CLOSE_BRACE;
+
+";"		return T_SEMICOLON;
+"."		return T_DOT;
+","		return T_COMMA;
+"?"		return T_QUERY;
+":"		return T_COLON;
+"f"		return T_F;
+
+[0-9]+						return T_NUMBER;
+[_a-zA-Z][_a-zA-Z0-9]*		return T_VARIABLE;
+\n							++number_str;
+[ \t]+						;
+// const							return T_CONST;//Не используются, хотя они есть
+// goto							return T_GOTO;
 %%
