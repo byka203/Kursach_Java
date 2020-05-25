@@ -87,7 +87,7 @@
 
 [0-9]+"."[0-9]+"f"                                  return T_FLOAT;
 [0-9]+                                              return T_NUMBER;
-[_a-zA-Z][_a-zA-Z0-9]*                              return T_VARIABLE;
+[_a-zA-Z][_a-zA-Z0-9]*                              return T_IDENTIFIER;
 \n                                                  ++number_str;
 [ \t]+                                              ;
 %%
