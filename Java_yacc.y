@@ -94,9 +94,9 @@ R_comma_next_IMPLEMENTS://множественная имплементация
 R_Modifiers:
         R_method_var//без модификаторов но есть тип
         |
-        T_CLASS R_EXTENDS R_IMPLEMENTS R_BodyClass//без модификаторов но есть слово "class" и возможно наследование, имплементация
+        T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass//без модификаторов но есть слово "class" и возможно наследование, имплементация
         |
-        T_INTERFACE R_BodyInterface//без модификаторов но есть слово "interface" 
+        T_INTERFACE T_IDENTIFIER R_BodyInterface//без модификаторов но есть слово "interface" 
         |
         T_ACCESS_MODIFIERS R_first_access//первый модификатор - доступа
         |
@@ -114,9 +114,9 @@ R_Modifiers:
 R_first_access://модификатор доступа может быть у классов, методов, переменных
         R_method_var//только модификатор доступа затем тип
         |
-        T_CLASS R_EXTENDS R_IMPLEMENTS R_BodyClass//только модификатор доступа затем слово "class" и возможно наследование, имплементация
+        T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass//только модификатор доступа затем слово "class" и возможно наследование, имплементация
         |
-        T_INTERFACE R_BodyInterface//только модификатор доступа затем "interface" 
+        T_INTERFACE T_IDENTIFIER R_BodyInterface//только модификатор доступа затем "interface" 
         |
         T_VARAIBLE_CLASS_METHOD_MODIFIERS R_second_class_method_var//второй модификатор - подходит для классов, методов, переменных
         |
@@ -132,9 +132,9 @@ R_first_access://модификатор доступа может быть у к
 R_first_class_method_var:
         R_method_var//только модификатор доступа затем тип
         |
-        T_CLASS R_EXTENDS R_IMPLEMENTS R_BodyClass//только модификатор доступа затем слово "class" и возможно наследование, имплементация
+        T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass//только модификатор доступа затем слово "class" и возможно наследование, имплементация
         |
-        T_INTERFACE R_BodyInterface//только модификатор доступа затем "interface" 
+        T_INTERFACE T_IDENTIFIER R_BodyInterface//только модификатор доступа затем "interface" 
         |
         T_ACCESS_MODIFIERS R_CMV_second_access//второй модификатор - доступа
         |
@@ -150,9 +150,9 @@ R_first_class_method_var:
 R_first_class_method:
         R_method_abstract//только модификатор abstract затем тип
         |
-        T_CLASS R_EXTENDS R_IMPLEMENTS R_BodyClass_abstract//только модификатор abstract затем "class" и возможно наследование, имплементация
+        T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass_abstract//только модификатор abstract затем "class" и возможно наследование, имплементация
         |
-        T_INTERFACE R_BodyInterface//только модификатор abstract затем "interface" 
+        T_INTERFACE T_IDENTIFIER R_BodyInterface//только модификатор abstract затем "interface" 
         |
         T_VARAIBLE_CLASS_METHOD_MODIFIERS R_CM_second_class_method//второй модификатор - подходит для классов, методов, переменных
         |
