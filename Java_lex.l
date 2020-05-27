@@ -20,11 +20,11 @@
 
 "public"|"private"|"protected"                      return T_ACCESS_MODIFIERS;
 
-"static"|"final"                                    return T_VARAIBLE_CLASS_METHOD_MODIFIERS;
-"abstract"                                          return T_CLASS_METHOD_MODIFIERS;
-"transient"                                         return T_VARAIBLE_MODIFIERS;
-"native"                                            return T_METHOD_MODIFIERS;
-"strictfp"                                          return T_CLASS_MODIFIERS;
+"static"|"final"                                    return T_STATIC_FINAL_MODIFIERS;
+"abstract"                                          return T_ABSTRACT_MODIFIERS;
+"transient"                                         return T_TRANSIENT_MODIFIERS;
+"native"                                            return T_NATIVE_MODIFIERS;
+"strictfp"                                          return T_STRICTFP_MODIFIERS;
 "synchronized"|"volatile"                           return T_STREAM_MODIFIERS;
 
 "extends"                                           return T_EXTENDS;

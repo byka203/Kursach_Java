@@ -1,0 +1,11 @@
+//SAMPLES FOR JAVA
+    https://www.cs.utexas.edu/~scottm/cs307/codingSamples.htm
+
+//Online compuler JAVA
+    https://www.jdoodle.com/online-java-compiler/
+
+gitHub с курсачём
+    https://github.com/sobolev-nv/Kursach_Java
+
+gitHub с Java лексером и парсером
+    https://github.com/antlr/grammars-v4
