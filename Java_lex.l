@@ -69,6 +69,7 @@
 "/"|"%"|"&"|"|"|"^"|"<<"|">>"|">>>"|"&&"|"||"       return T_BINARY_SIGN;
 "*"                                                 return T_STAR;
 "="                                                 return T_ASSIGNMENT;
+"+="|"-="|"*="|"/="|"%="|"&="|"|="|">>="|"<<="      return T_ASSIGNMENT2;
 
 "("                                                 return T_OPEN_BRACKET;
 ")"                                                 return T_CLOSE_BRACKET;
