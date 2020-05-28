@@ -9,3 +9,6 @@ gitHub с курсачём
 
 gitHub с Java лексером и парсером
     https://github.com/antlr/grammars-v4
+
+Документация java oracle
+    https://docs.oracle.com/javase/specs/jls/se7/html/jls-0-index.html

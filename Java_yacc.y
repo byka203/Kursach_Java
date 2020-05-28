@@ -1,1341 +1,627 @@
-/*
- * [The "BSD license"]
- *  Copyright (c) 2014 Terence Parr
- *  Copyright (c) 2014 Sam Harwell
- *  All rights reserved.
- *
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions
- *  are met:
- *
- *  1. Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products
- *     derived from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- *  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- *  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- *  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- *  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+%{
+#include <stdio.h>
+#include <string.h>
 
-/**
- * A Java 8 grammar for ANTLR 4 derived from the Java Language Specification
- * chapter 19.
- *
- * NOTE: This grammar results in a generated parser that is much slower
- *       than the Java 7 grammar in the grammars-v4/java directory. This
- *     one is, however, extremely close to the spec.
- *
- * You can test with
- *
- *  $ antlr4 Java8.g4
- *  $ javac *.java
- *  $ grun Java8 compilationUnit *.java
- *
- * Or,
-~/antlr/code/grammars-v4/java8 $ java Test .
-/Users/parrt/antlr/code/grammars-v4/java8/./Java8BaseListener.java
-/Users/parrt/antlr/code/grammars-v4/java8/./Java8Lexer.java
-/Users/parrt/antlr/code/grammars-v4/java8/./Java8Listener.java
-/Users/parrt/antlr/code/grammars-v4/java8/./Java8Parser.java
-/Users/parrt/antlr/code/grammars-v4/java8/./Test.java
-Total lexer+parser time 30844ms.
- */
-parser grammar Java8Parser;
+extern int yylex();
 
-options {
-    tokenVocab=Java8Lexer;
+extern int yylval;
+int yydebug=1;
+int number_str=1;
+
+void yyerror(const char *str){
+    fprintf(stderr,"error: %s\n", str);
+    fprintf(stderr,"str: %d\n", number_str);
 }
-/*
- * Productions from §3 (Lexical Structure)
- */
-
-literal
-    :   IntegerLiteral
-    |   FloatingPointLiteral
-    |   BooleanLiteral
-    |   CharacterLiteral
-    |   StringLiteral
-    |   NullLiteral
-    ;
-
-/*
- * Productions from §4 (Types, Values, and Variables)
- */
-
-primitiveType
-    :   annotation* numericType
-    |   annotation* 'boolean'
-    ;
-
-numericType
-    :   integralType
-    |   floatingPointType
-    ;
-
-integralType
-    :   'byte'
-    |   'short'
-    |   'int'
-    |   'long'
-    |   'char'
-    ;
-
-floatingPointType
-    :   'float'
-    |   'double'
-    ;
-
-referenceType
-    :   classOrInterfaceType
-    |   typeVariable
-    |   arrayType
-    ;
-
-classOrInterfaceType
-    :   (   classType_lfno_classOrInterfaceType
-        |   interfaceType_lfno_classOrInterfaceType
-        )
-        (   classType_lf_classOrInterfaceType
-        |   interfaceType_lf_classOrInterfaceType
-        )*
-    ;
-
-classType
-    :   annotation* Identifier typeArguments?
-    |   classOrInterfaceType '.' annotation* Identifier typeArguments?
-    ;
-
-classType_lf_classOrInterfaceType
-    :   '.' annotation* Identifier typeArguments?
-    ;
-
-classType_lfno_classOrInterfaceType
-    :   annotation* Identifier typeArguments?
-    ;
-
-interfaceType
-    :   classType
-    ;
-
-interfaceType_lf_classOrInterfaceType
-    :   classType_lf_classOrInterfaceType
-    ;
-
-interfaceType_lfno_classOrInterfaceType
-    :   classType_lfno_classOrInterfaceType
-    ;
-
-typeVariable
-    :   annotation* Identifier
-    ;
-
-arrayType
-    :   primitiveType dims
-    |   classOrInterfaceType dims
-    |   typeVariable dims
-    ;
-
-dims
-    :   annotation* '[' ']' (annotation* '[' ']')*
-    ;
-
-typeParameter
-    :   typeParameterModifier* Identifier typeBound?
-    ;
-
-typeParameterModifier
-    :   annotation
-    ;
-
-typeBound
-    :   'extends' typeVariable
-    |   'extends' classOrInterfaceType additionalBound*
-    ;
-
-additionalBound
-    :   '&' interfaceType
-    ;
-
-typeArguments
-    :   '<' typeArgumentList '>'
-    ;
-
-typeArgumentList
-    :   typeArgument (',' typeArgument)*
-    ;
-
-typeArgument
-    :   referenceType
-    |   wildcard
-    ;
-
-wildcard
-    :   annotation* '?' wildcardBounds?
-    ;
-
-wildcardBounds
-    :   'extends' referenceType
-    |   'super' referenceType
-    ;
-
-/*
- * Productions from §6 (Names)
- */
-
-packageName
-    :   Identifier
-    |   packageName '.' Identifier
-    ;
-
-typeName
-    :   Identifier
-    |   packageOrTypeName '.' Identifier
-    ;
-
-packageOrTypeName
-    :   Identifier
-    |   packageOrTypeName '.' Identifier
-    ;
-
-expressionName
-    :   Identifier
-    |   ambiguousName '.' Identifier
-    ;
-
-methodName
-    :   Identifier
-    ;
-
-ambiguousName
-    :   Identifier
-    |   ambiguousName '.' Identifier
-    ;
-
-/*
- * Productions from §7 (Packages)
- */
-
-compilationUnit
-    :   packageDeclaration? importDeclaration* typeDeclaration* EOF
-    ;
-
-packageDeclaration
-    :   packageModifier* 'package' packageName ';'
-    ;
-
-packageModifier
-    :   annotation
-    ;
-
-importDeclaration
-    :   singleTypeImportDeclaration
-    |   typeImportOnDemandDeclaration
-    |   singleStaticImportDeclaration
-    |   staticImportOnDemandDeclaration
-    ;
-
-singleTypeImportDeclaration
-    :   'import' typeName ';'
-    ;
-
-typeImportOnDemandDeclaration
-    :   'import' packageOrTypeName '.' '*' ';'
-    ;
-
-singleStaticImportDeclaration
-    :   'import' 'static' typeName '.' Identifier ';'
-    ;
-
-staticImportOnDemandDeclaration
-    :   'import' 'static' typeName '.' '*' ';'
-    ;
-
-typeDeclaration
-    :   classDeclaration
-    |   interfaceDeclaration
-    |   ';'
-    ;
-
-/*
- * Productions from §8 (Classes)
- */
-
-classDeclaration
-    :   normalClassDeclaration
-    |   enumDeclaration
-    ;
-
-normalClassDeclaration
-    :   classModifier* 'class' Identifier typeParameters? superclass? superinterfaces? classBody
-    ;
-
-classModifier
-    :   annotation
-    |   'public'
-    |   'protected'
-    |   'private'
-    |   'abstract'
-    |   'static'
-    |   'final'
-    |   'strictfp'
-    ;
-
-typeParameters
-    :   '<' typeParameterList '>'
-    ;
-
-typeParameterList
-    :   typeParameter (',' typeParameter)*
-    ;
-
-superclass
-    :   'extends' classType
-    ;
-
-superinterfaces
-    :   'implements' interfaceTypeList
-    ;
-
-interfaceTypeList
-    :   interfaceType (',' interfaceType)*
-    ;
-
-classBody
-    :   '{' classBodyDeclaration* '}'
-    ;
-
-classBodyDeclaration
-    :   classMemberDeclaration
-    |   instanceInitializer
-    |   staticInitializer
-    |   constructorDeclaration
-    ;
-
-classMemberDeclaration
-    :   fieldDeclaration
-    |   methodDeclaration
-    |   classDeclaration
-    |   interfaceDeclaration
-    |   ';'
-    ;
-
-fieldDeclaration
-    :   fieldModifier* unannType variableDeclaratorList ';'
-    ;
-
-fieldModifier
-    :   annotation
-    |   'public'
-    |   'protected'
-    |   'private'
-    |   'static'
-    |   'final'
-    |   'transient'
-    |   'volatile'
-    ;
-
-variableDeclaratorList
-    :   variableDeclarator (',' variableDeclarator)*
-    ;
-
-variableDeclarator
-    :   variableDeclaratorId ('=' variableInitializer)?
-    ;
-
-variableDeclaratorId
-    :   Identifier dims?
-    ;
-
-variableInitializer
-    :   expression
-    |   arrayInitializer
-    ;
-
-unannType
-    :   unannPrimitiveType
-    |   unannReferenceType
-    ;
-
-unannPrimitiveType
-    :   numericType
-    |   'boolean'
-    ;
-
-unannReferenceType
-    :   unannClassOrInterfaceType
-    |   unannTypeVariable
-    |   unannArrayType
-    ;
-
-unannClassOrInterfaceType
-    :   (   unannClassType_lfno_unannClassOrInterfaceType
-        |   unannInterfaceType_lfno_unannClassOrInterfaceType
-        )
-        (   unannClassType_lf_unannClassOrInterfaceType
-        |   unannInterfaceType_lf_unannClassOrInterfaceType
-        )*
-    ;
-
-unannClassType
-    :   Identifier typeArguments?
-    |   unannClassOrInterfaceType '.' annotation* Identifier typeArguments?
-    ;
-
-unannClassType_lf_unannClassOrInterfaceType
-    :   '.' annotation* Identifier typeArguments?
-    ;
-
-unannClassType_lfno_unannClassOrInterfaceType
-    :   Identifier typeArguments?
-    ;
-
-unannInterfaceType
-    :   unannClassType
-    ;
-
-unannInterfaceType_lf_unannClassOrInterfaceType
-    :   unannClassType_lf_unannClassOrInterfaceType
-    ;
-
-unannInterfaceType_lfno_unannClassOrInterfaceType
-    :   unannClassType_lfno_unannClassOrInterfaceType
-    ;
-
-unannTypeVariable
-    :   Identifier
-    ;
-
-unannArrayType
-    :   unannPrimitiveType dims
-    |   unannClassOrInterfaceType dims
-    |   unannTypeVariable dims
-    ;
-
-methodDeclaration
-    :   methodModifier* methodHeader methodBody
-    ;
-
-methodModifier
-    :   annotation
-    |   'public'
-    |   'protected'
-    |   'private'
-    |   'abstract'
-    |   'static'
-    |   'final'
-    |   'synchronized'
-    |   'native'
-    |   'strictfp'
-    ;
-
-methodHeader
-    :   result methodDeclarator throws_?
-    |   typeParameters annotation* result methodDeclarator throws_?
-    ;
-
-result
-    :   unannType
-    |   'void'
-    ;
-
-methodDeclarator
-    :   Identifier '(' formalParameterList? ')' dims?
-    ;
-
-formalParameterList
-    :   receiverParameter
-    |   formalParameters ',' lastFormalParameter
-    |   lastFormalParameter
-    ;
-
-formalParameters
-    :   formalParameter (',' formalParameter)*
-    |   receiverParameter (',' formalParameter)*
-    ;
-
-formalParameter
-    :   variableModifier* unannType variableDeclaratorId
-    ;
-
-variableModifier
-    :   annotation
-    |   'final'
-    ;
-
-lastFormalParameter
-    :   variableModifier* unannType annotation* '...' variableDeclaratorId
-    |   formalParameter
-    ;
-
-receiverParameter
-    :   annotation* unannType (Identifier '.')? 'this'
-    ;
-
-throws_
-    :   'throws' exceptionTypeList
-    ;
-
-exceptionTypeList
-    :   exceptionType (',' exceptionType)*
-    ;
-
-exceptionType
-    :   classType
-    |   typeVariable
-    ;
-
-methodBody
-    :   block
-    |   ';'
-    ;
-
-instanceInitializer
-    :   block
-    ;
-
-staticInitializer
-    :   'static' block
-    ;
-
-constructorDeclaration
-    :   constructorModifier* constructorDeclarator throws_? constructorBody
-    ;
-
-constructorModifier
-    :   annotation
-    |   'public'
-    |   'protected'
-    |   'private'
-    ;
-
-constructorDeclarator
-    :   typeParameters? simpleTypeName '(' formalParameterList? ')'
-    ;
-
-simpleTypeName
-    :   Identifier
-    ;
-
-constructorBody
-    :   '{' explicitConstructorInvocation? blockStatements? '}'
-    ;
-
-explicitConstructorInvocation
-    :   typeArguments? 'this' '(' argumentList? ')' ';'
-    |   typeArguments? 'super' '(' argumentList? ')' ';'
-    |   expressionName '.' typeArguments? 'super' '(' argumentList? ')' ';'
-    |   primary '.' typeArguments? 'super' '(' argumentList? ')' ';'
-    ;
-
-enumDeclaration
-    :   classModifier* 'enum' Identifier superinterfaces? enumBody
-    ;
-
-enumBody
-    :   '{' enumConstantList? ','? enumBodyDeclarations? '}'
-    ;
-
-enumConstantList
-    :   enumConstant (',' enumConstant)*
-    ;
-
-enumConstant
-    :   enumConstantModifier* Identifier ('(' argumentList? ')')? classBody?
-    ;
-
-enumConstantModifier
-    :   annotation
-    ;
-
-enumBodyDeclarations
-    :   ';' classBodyDeclaration*
-    ;
-
-/*
- * Productions from §9 (Interfaces)
- */
-
-interfaceDeclaration
-    :   normalInterfaceDeclaration
-    |   annotationTypeDeclaration
-    ;
-
-normalInterfaceDeclaration
-    :   interfaceModifier* 'interface' Identifier typeParameters? extendsInterfaces? interfaceBody
-    ;
-
-interfaceModifier
-    :   annotation
-    |   'public'
-    |   'protected'
-    |   'private'
-    |   'abstract'
-    |   'static'
-    |   'strictfp'
-    ;
-
-extendsInterfaces
-    :   'extends' interfaceTypeList
-    ;
-
-interfaceBody
-    :   '{' interfaceMemberDeclaration* '}'
-    ;
-
-interfaceMemberDeclaration
-    :   constantDeclaration
-    |   interfaceMethodDeclaration
-    |   classDeclaration
-    |   interfaceDeclaration
-    |   ';'
-    ;
-
-constantDeclaration
-    :   constantModifier* unannType variableDeclaratorList ';'
-    ;
-
-constantModifier
-    :   annotation
-    |   'public'
-    |   'static'
-    |   'final'
-    ;
-
-interfaceMethodDeclaration
-    :   interfaceMethodModifier* methodHeader methodBody
-    ;
-
-interfaceMethodModifier
-    :   annotation
-    |   'public'
-    |   'abstract'
-    |   'default'
-    |   'static'
-    |   'strictfp'
-    ;
-
-annotationTypeDeclaration
-    :   interfaceModifier* '@' 'interface' Identifier annotationTypeBody
-    ;
-
-annotationTypeBody
-    :   '{' annotationTypeMemberDeclaration* '}'
-    ;
-
-annotationTypeMemberDeclaration
-    :   annotationTypeElementDeclaration
-    |   constantDeclaration
-    |   classDeclaration
-    |   interfaceDeclaration
-    |   ';'
-    ;
-
-annotationTypeElementDeclaration
-    :   annotationTypeElementModifier* unannType Identifier '(' ')' dims? defaultValue? ';'
-    ;
-
-annotationTypeElementModifier
-    :   annotation
-    |   'public'
-    |   'abstract'
-    ;
-
-defaultValue
-    :   'default' elementValue
-    ;
-
-annotation
-    :   normalAnnotation
-    |   markerAnnotation
-    |   singleElementAnnotation
-    ;
-
-normalAnnotation
-    :   '@' typeName '(' elementValuePairList? ')'
-    ;
-
-elementValuePairList
-    :   elementValuePair (',' elementValuePair)*
-    ;
-
-elementValuePair
-    :   Identifier '=' elementValue
-    ;
-
-elementValue
-    :   conditionalExpression
-    |   elementValueArrayInitializer
-    |   annotation
-    ;
-
-elementValueArrayInitializer
-    :   '{' elementValueList? ','? '}'
-    ;
-
-elementValueList
-    :   elementValue (',' elementValue)*
-    ;
-
-markerAnnotation
-    :   '@' typeName
-    ;
-
-singleElementAnnotation
-    :   '@' typeName '(' elementValue ')'
-    ;
-
-/*
- * Productions from §10 (Arrays)
- */
-
-arrayInitializer
-    :   '{' variableInitializerList? ','? '}'
-    ;
-
-variableInitializerList
-    :   variableInitializer (',' variableInitializer)*
-    ;
-
-/*
- * Productions from §14 (Blocks and Statements)
- */
-
-block
-    :   '{' blockStatements? '}'
-    ;
-
-blockStatements
-    :   blockStatement+
-    ;
-
-blockStatement
-    :   localVariableDeclarationStatement
-    |   classDeclaration
-    |   statement
-    ;
-
-localVariableDeclarationStatement
-    :   localVariableDeclaration ';'
-    ;
-
-localVariableDeclaration
-    :   variableModifier* unannType variableDeclaratorList
-    ;
-
-statement
-    :   statementWithoutTrailingSubstatement
-    |   labeledStatement
-    |   ifThenStatement
-    |   ifThenElseStatement
-    |   whileStatement
-    |   forStatement
-    ;
-
-statementNoShortIf
-    :   statementWithoutTrailingSubstatement
-    |   labeledStatementNoShortIf
-    |   ifThenElseStatementNoShortIf
-    |   whileStatementNoShortIf
-    |   forStatementNoShortIf
-    ;
-
-statementWithoutTrailingSubstatement
-    :   block
-    |   emptyStatement
-    |   expressionStatement
-    |   assertStatement
-    |   switchStatement
-    |   doStatement
-    |   breakStatement
-    |   continueStatement
-    |   returnStatement
-    |   synchronizedStatement
-    |   throwStatement
-    |   tryStatement
-    ;
-
-emptyStatement
-    :   ';'
-    ;
-
-labeledStatement
-    :   Identifier ':' statement
-    ;
-
-labeledStatementNoShortIf
-    :   Identifier ':' statementNoShortIf
-    ;
-
-expressionStatement
-    :   statementExpression ';'
-    ;
-
-statementExpression
-    :   assignment
-    |   preIncrementExpression
-    |   preDecrementExpression
-    |   postIncrementExpression
-    |   postDecrementExpression
-    |   methodInvocation
-    |   classInstanceCreationExpression
-    ;
-
-ifThenStatement
-    :   'if' '(' expression ')' statement
-    ;
-
-ifThenElseStatement
-    :   'if' '(' expression ')' statementNoShortIf 'else' statement
-    ;
-
-ifThenElseStatementNoShortIf
-    :   'if' '(' expression ')' statementNoShortIf 'else' statementNoShortIf
-    ;
-
-assertStatement
-    :   'assert' expression ';'
-    |   'assert' expression ':' expression ';'
-    ;
-
-switchStatement
-    :   'switch' '(' expression ')' switchBlock
-    ;
-
-switchBlock
-    :   '{' switchBlockStatementGroup* switchLabel* '}'
-    ;
-
-switchBlockStatementGroup
-    :   switchLabels blockStatements
-    ;
-
-switchLabels
-    :   switchLabel switchLabel*
-    ;
-
-switchLabel
-    :   'case' constantExpression ':'
-    |   'case' enumConstantName ':'
-    |   'default' ':'
-    ;
-
-enumConstantName
-    :   Identifier
-    ;
-
-whileStatement
-    :   'while' '(' expression ')' statement
-    ;
-
-whileStatementNoShortIf
-    :   'while' '(' expression ')' statementNoShortIf
-    ;
-
-doStatement
-    :   'do' statement 'while' '(' expression ')' ';'
-    ;
-
-forStatement
-    :   basicForStatement
-    |   enhancedForStatement
-    ;
-
-forStatementNoShortIf
-    :   basicForStatementNoShortIf
-    |   enhancedForStatementNoShortIf
-    ;
-
-basicForStatement
-    :   'for' '(' forInit? ';' expression? ';' forUpdate? ')' statement
-    ;
-
-basicForStatementNoShortIf
-    :   'for' '(' forInit? ';' expression? ';' forUpdate? ')' statementNoShortIf
-    ;
-
-forInit
-    :   statementExpressionList
-    |   localVariableDeclaration
-    ;
-
-forUpdate
-    :   statementExpressionList
-    ;
-
-statementExpressionList
-    :   statementExpression (',' statementExpression)*
-    ;
-
-enhancedForStatement
-    :   'for' '(' variableModifier* unannType variableDeclaratorId ':' expression ')' statement
-    ;
-
-enhancedForStatementNoShortIf
-    :   'for' '(' variableModifier* unannType variableDeclaratorId ':' expression ')' statementNoShortIf
-    ;
-
-breakStatement
-    :   'break' Identifier? ';'
-    ;
-
-continueStatement
-    :   'continue' Identifier? ';'
-    ;
-
-returnStatement
-    :   'return' expression? ';'
-    ;
-
-throwStatement
-    :   'throw' expression ';'
-    ;
-
-synchronizedStatement
-    :   'synchronized' '(' expression ')' block
-    ;
-
-tryStatement
-    :   'try' block catches
-    |   'try' block catches? finally_
-    |   tryWithResourcesStatement
-    ;
-
-catches
-    :   catchClause catchClause*
-    ;
-
-catchClause
-    :   'catch' '(' catchFormalParameter ')' block
-    ;
-
-catchFormalParameter
-    :   variableModifier* catchType variableDeclaratorId
-    ;
-
-catchType
-    :   unannClassType ('|' classType)*
-    ;
-
-finally_
-    :   'finally' block
-    ;
-
-tryWithResourcesStatement
-    :   'try' resourceSpecification block catches? finally_?
-    ;
-
-resourceSpecification
-    :   '(' resourceList ';'? ')'
-    ;
-
-resourceList
-    :   resource (';' resource)*
-    ;
-
-resource
-    :   variableModifier* unannType variableDeclaratorId '=' expression
-    ;
-
-/*
- * Productions from §15 (Expressions)
- */
-
-primary
-    :   (   primaryNoNewArray_lfno_primary
-        |   arrayCreationExpression
-        )
-        (   primaryNoNewArray_lf_primary
-        )*
-    ;
-
-primaryNoNewArray
-    :   literal
-    |   typeName ('[' ']')* '.' 'class'
-    |   'void' '.' 'class'
-    |   'this'
-    |   typeName '.' 'this'
-    |   '(' expression ')'
-    |   classInstanceCreationExpression
-    |   fieldAccess
-    |   arrayAccess
-    |   methodInvocation
-    |   methodReference
-    ;
-
-primaryNoNewArray_lf_arrayAccess
-    :
-    ;
-
-primaryNoNewArray_lfno_arrayAccess
-    :   literal
-    |   typeName ('[' ']')* '.' 'class'
-    |   'void' '.' 'class'
-    |   'this'
-    |   typeName '.' 'this'
-    |   '(' expression ')'
-    |   classInstanceCreationExpression
-    |   fieldAccess
-    |   methodInvocation
-    |   methodReference
-    ;
-
-primaryNoNewArray_lf_primary
-    :   classInstanceCreationExpression_lf_primary
-    |   fieldAccess_lf_primary
-    |   arrayAccess_lf_primary
-    |   methodInvocation_lf_primary
-    |   methodReference_lf_primary
-    ;
-
-primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
-    :
-    ;
-
-primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
-    :   classInstanceCreationExpression_lf_primary
-    |   fieldAccess_lf_primary
-    |   methodInvocation_lf_primary
-    |   methodReference_lf_primary
-    ;
-
-primaryNoNewArray_lfno_primary
-    :   literal
-    |   typeName ('[' ']')* '.' 'class'
-    |   unannPrimitiveType ('[' ']')* '.' 'class'
-    |   'void' '.' 'class'
-    |   'this'
-    |   typeName '.' 'this'
-    |   '(' expression ')'
-    |   classInstanceCreationExpression_lfno_primary
-    |   fieldAccess_lfno_primary
-    |   arrayAccess_lfno_primary
-    |   methodInvocation_lfno_primary
-    |   methodReference_lfno_primary
-    ;
-
-primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
-    :
-    ;
-
-primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary
-    :   literal
-    |   typeName ('[' ']')* '.' 'class'
-    |   unannPrimitiveType ('[' ']')* '.' 'class'
-    |   'void' '.' 'class'
-    |   'this'
-    |   typeName '.' 'this'
-    |   '(' expression ')'
-    |   classInstanceCreationExpression_lfno_primary
-    |   fieldAccess_lfno_primary
-    |   methodInvocation_lfno_primary
-    |   methodReference_lfno_primary
-    ;
-
-classInstanceCreationExpression
-    :   'new' typeArguments? annotation* Identifier ('.' annotation* Identifier)* typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    |   expressionName '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    |   primary '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    ;
-
-classInstanceCreationExpression_lf_primary
-    :   '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    ;
-
-classInstanceCreationExpression_lfno_primary
-    :   'new' typeArguments? annotation* Identifier ('.' annotation* Identifier)* typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    |   expressionName '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-    ;
-
-typeArgumentsOrDiamond
-    :   typeArguments
-    |   '<' '>'
-    ;
-
-fieldAccess
-    :   primary '.' Identifier
-    |   'super' '.' Identifier
-    |   typeName '.' 'super' '.' Identifier
-    ;
-
-fieldAccess_lf_primary
-    :   '.' Identifier
-    ;
-
-fieldAccess_lfno_primary
-    :   'super' '.' Identifier
-    |   typeName '.' 'super' '.' Identifier
-    ;
-
-arrayAccess
-    :   (   expressionName '[' expression ']'
-        |   primaryNoNewArray_lfno_arrayAccess '[' expression ']'
-        )
-        (   primaryNoNewArray_lf_arrayAccess '[' expression ']'
-        )*
-    ;
-
-arrayAccess_lf_primary
-    :   (   primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary '[' expression ']'
-        )
-        (   primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary '[' expression ']'
-        )*
-    ;
-
-arrayAccess_lfno_primary
-    :   (   expressionName '[' expression ']'
-        |   primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary '[' expression ']'
-        )
-        (   primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary '[' expression ']'
-        )*
-    ;
-
-methodInvocation
-    :   methodName '(' argumentList? ')'
-    |   typeName '.' typeArguments? Identifier '(' argumentList? ')'
-    |   expressionName '.' typeArguments? Identifier '(' argumentList? ')'
-    |   primary '.' typeArguments? Identifier '(' argumentList? ')'
-    |   'super' '.' typeArguments? Identifier '(' argumentList? ')'
-    |   typeName '.' 'super' '.' typeArguments? Identifier '(' argumentList? ')'
-    ;
-
-methodInvocation_lf_primary
-    :   '.' typeArguments? Identifier '(' argumentList? ')'
-    ;
-
-methodInvocation_lfno_primary
-    :   methodName '(' argumentList? ')'
-    |   typeName '.' typeArguments? Identifier '(' argumentList? ')'
-    |   expressionName '.' typeArguments? Identifier '(' argumentList? ')'
-    |   'super' '.' typeArguments? Identifier '(' argumentList? ')'
-    |   typeName '.' 'super' '.' typeArguments? Identifier '(' argumentList? ')'
-    ;
-
-argumentList
-    :   expression (',' expression)*
-    ;
-
-methodReference
-    :   expressionName '::' typeArguments? Identifier
-    |   referenceType '::' typeArguments? Identifier
-    |   primary '::' typeArguments? Identifier
-    |   'super' '::' typeArguments? Identifier
-    |   typeName '.' 'super' '::' typeArguments? Identifier
-    |   classType '::' typeArguments? 'new'
-    |   arrayType '::' 'new'
-    ;
-
-methodReference_lf_primary
-    :   '::' typeArguments? Identifier
-    ;
-
-methodReference_lfno_primary
-    :   expressionName '::' typeArguments? Identifier
-    |   referenceType '::' typeArguments? Identifier
-    |   'super' '::' typeArguments? Identifier
-    |   typeName '.' 'super' '::' typeArguments? Identifier
-    |   classType '::' typeArguments? 'new'
-    |   arrayType '::' 'new'
-    ;
-
-arrayCreationExpression
-    :   'new' primitiveType dimExprs dims?
-    |   'new' classOrInterfaceType dimExprs dims?
-    |   'new' primitiveType dims arrayInitializer
-    |   'new' classOrInterfaceType dims arrayInitializer
-    ;
-
-dimExprs
-    :   dimExpr dimExpr*
-    ;
-
-dimExpr
-    :   annotation* '[' expression ']'
-    ;
-
-constantExpression
-    :   expression
-    ;
-
-expression
-    :   lambdaExpression
-    |   assignmentExpression
-    ;
-
-lambdaExpression
-    :   lambdaParameters '->' lambdaBody
-    ;
-
-lambdaParameters
-    :   Identifier
-    |   '(' formalParameterList? ')'
-    |   '(' inferredFormalParameterList ')'
-    ;
-
-inferredFormalParameterList
-    :   Identifier (',' Identifier)*
-    ;
-
-lambdaBody
-    :   expression
-    |   block
-    ;
-
-assignmentExpression
-    :   conditionalExpression
-    |   assignment
-    ;
-
-assignment
-    :   leftHandSide assignmentOperator expression
-    ;
-
-leftHandSide
-    :   expressionName
-    |   fieldAccess
-    |   arrayAccess
-    ;
-
-assignmentOperator
-    :   '='
-    |   '*='
-    |   '/='
-    |   '%='
-    |   '+='
-    |   '-='
-    |   '<<='
-    |   '>>='
-    |   '>>>='
-    |   '&='
-    |   '^='
-    |   '|='
-    ;
-
-conditionalExpression
-    :   conditionalOrExpression
-    |   conditionalOrExpression '?' expression ':' conditionalExpression
-    ;
-
-conditionalOrExpression
-    :   conditionalAndExpression
-    |   conditionalOrExpression '||' conditionalAndExpression
-    ;
-
-conditionalAndExpression
-    :   inclusiveOrExpression
-    |   conditionalAndExpression '&&' inclusiveOrExpression
-    ;
-
-inclusiveOrExpression
-    :   exclusiveOrExpression
-    |   inclusiveOrExpression '|' exclusiveOrExpression
-    ;
-
-exclusiveOrExpression
-    :   andExpression
-    |   exclusiveOrExpression '^' andExpression
-    ;
-
-andExpression
-    :   equalityExpression
-    |   andExpression '&' equalityExpression
-    ;
-
-equalityExpression
-    :   relationalExpression
-    |   equalityExpression '==' relationalExpression
-    |   equalityExpression '!=' relationalExpression
-    ;
-
-relationalExpression
-    :   shiftExpression
-    |   relationalExpression '<' shiftExpression
-    |   relationalExpression '>' shiftExpression
-    |   relationalExpression '<=' shiftExpression
-    |   relationalExpression '>=' shiftExpression
-    |   relationalExpression 'instanceof' referenceType
-    ;
-
-shiftExpression
-    :   additiveExpression
-    |   shiftExpression '<' '<' additiveExpression
-    |   shiftExpression '>' '>' additiveExpression
-    |   shiftExpression '>' '>' '>' additiveExpression
-    ;
-
-additiveExpression
-    :   multiplicativeExpression
-    |   additiveExpression '+' multiplicativeExpression
-    |   additiveExpression '-' multiplicativeExpression
-    ;
-
-multiplicativeExpression
-    :   unaryExpression
-    |   multiplicativeExpression '*' unaryExpression
-    |   multiplicativeExpression '/' unaryExpression
-    |   multiplicativeExpression '%' unaryExpression
-    ;
-
-unaryExpression
-    :   preIncrementExpression
-    |   preDecrementExpression
-    |   '+' unaryExpression
-    |   '-' unaryExpression
-    |   unaryExpressionNotPlusMinus
-    ;
-
-preIncrementExpression
-    :   '++' unaryExpression
-    ;
-
-preDecrementExpression
-    :   '--' unaryExpression
-    ;
-
-unaryExpressionNotPlusMinus
-    :   postfixExpression
-    |   '~' unaryExpression
-    |   '!' unaryExpression
-    |   castExpression
-    ;
-
-postfixExpression
-    :   (   primary
-        |   expressionName
-        )
-        (   postIncrementExpression_lf_postfixExpression
-        |   postDecrementExpression_lf_postfixExpression
-        )*
-    ;
-
-postIncrementExpression
-    :   postfixExpression '++'
-    ;
-
-postIncrementExpression_lf_postfixExpression
-    :   '++'
-    ;
-
-postDecrementExpression
-    :   postfixExpression '--'
-    ;
-
-postDecrementExpression_lf_postfixExpression
-    :   '--'
-    ;
-
-castExpression
-    :   '(' primitiveType ')' unaryExpression
-    |   '(' referenceType additionalBound* ')' unaryExpressionNotPlusMinus
-    |   '(' referenceType additionalBound* ')' lambdaExpression
-    ;
+
+int yywrap(){
+    return 1;
+}
+
+%}
+
+
+%start R_Programm
+%token T_STAR T_IMPORT T_PACKAGE T_CLASS T_INTERFACE T_DATA_TYPE T_DATA_TYPE_VARAIBLE T_DATA_TYPE_METHOD T_ENUM T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS T_TRANSIENT_MODIFIERS T_NATIVE_MODIFIERS T_STRICTFP_MODIFIERS T_STREAM_MODIFIERS T_EXTENDS T_IMPLEMENTS T_THROW T_TRUE_FALSE T_IF T_ELSE T_SWITCH T_CASE T_DEFAULT T_TRY T_CATCH T_THROWS T_FINALLY T_FOR T_DO T_WHILE T_BREAK T_CONTINUE T_NEW T_SUPER T_THIS T_ASSERT T_INSTACEOF T_RETURN T_INCREMENT_DECREMENT_SIGN T_UNARY_SIGN_ONLY T_COMPARISON_SIGN T_BINARY_SIGN T_ASSIGNMENT T_OPEN_BRACKET T_CLOSE_BRACKET T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET T_OPEN_BRACE T_CLOSE_BRACE T_SEMICOLON T_DOT T_COMMA T_QUERY T_COLON T_FLOAT T_STRING T_NUMBER T_IDENTIFIER T_MINUS T_PLUS
+
+%%
+R_Programm:
+        R_Directives R_Classes
+        ;
+
+R_Classes:
+        |
+        R_Classes R_Modifiers
+        ;
+
+R_Directives:
+        |
+        R_Directives R_Package T_SEMICOLON
+        |
+        R_Directives R_Import T_SEMICOLON
+        ;
+
+R_Package:
+        T_PACKAGE T_IDENTIFIER
+        ;
+
+R_NamePacket:
+        |
+        R_NamePacket T_DOT T_IDENTIFIER
+        ;
+
+R_Import:
+        T_IMPORT T_IDENTIFIER R_NamePacket
+        |
+        T_IMPORT T_IDENTIFIER R_NamePacket T_DOT T_STAR
+        ;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+R_EXTENDS://наследование
+        |
+        T_EXTENDS T_IDENTIFIER
+        ;
+
+R_IMPLEMENTS://имплементация
+        |
+        T_IMPLEMENTS T_IDENTIFIER R_comma_next_IMPLEMENTS
+        ;
+
+R_comma_next_IMPLEMENTS://множественная имплементация
+        |
+        T_COMMA T_IDENTIFIER R_comma_next_IMPLEMENTS
+        ;
+
+R_class_interface:
+        T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass
+        |
+        T_INTERFACE T_IDENTIFIER R_BodyInterface
+        ;
+
+
+//слой 0
+R_Modifiers:
+        R_method_varaible
+        |
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access
+        |
+        T_STATIC_FINAL_MODIFIERS R_staticfinal
+        |
+        T_ABSTRACT_MODIFIERS R_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_transient
+        |
+        T_NATIVE_MODIFIERS R_native
+        |
+        T_STRICTFP_MODIFIERS R_strictfp
+        ;
+
+
+//слой 1
+R_access://модификатор доступа может быть у классов, методов, переменных
+        R_method_varaible//только модификатор доступа затем тип
+        |
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_access_staticfinal
+        |
+        T_ABSTRACT_MODIFIERS R_access_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_access_transient
+        |
+        T_NATIVE_MODIFIERS R_access_native
+        |
+        T_STRICTFP_MODIFIERS R_access_strictfp
+        ;
+
+R_staticfinal:
+        R_method_varaible
+        |
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access_staticfinal
+        |
+        T_ABSTRACT_MODIFIERS R_staticfinal_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_staticfinal_transient
+        |
+        T_NATIVE_MODIFIERS R_staticfinal_native
+        |
+        T_STRICTFP_MODIFIERS R_staticfinal_strictfp
+        ;
+
+R_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_staticfinal_abstract
+        |
+        T_ACCESS_MODIFIERS R_access_abstract
+        |
+        T_NATIVE_MODIFIERS R_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_abstract_strictfp
+        ;
+
+R_transient:
+        R_defin_var1//только модификатор transient затем тип
+        |
+        T_ACCESS_MODIFIERS R_defin_var1//втроой модификатор - доступа
+        |
+        T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS R_defin_var1//втроой модификатор - доступа, третий модификатор - подходит для классов, методов, переменных
+        |
+        T_STATIC_FINAL_MODIFIERS R_defin_var1//втроой модификатор - подходит для классов, методов, переменных
+        |
+        T_STATIC_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_defin_var1//втроой модификатор - подходит для классов, методов, переменных, третий модификатор - доступа
+        ;
+
+R_native:
+        R_method_abstract//абстраткт так как нативный метод не имеет тела
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        |
+        T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS R_method_abstract
+        |
+        T_STATIC_FINAL_MODIFIERS R_method_abstract
+        |
+        T_STATIC_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_method_abstract
+        ;
+
+R_strictfp:
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access_strictfp
+        |
+        T_STATIC_FINAL_MODIFIERS R_staticfinal_strictfp
+        |
+        T_ABSTRACT_MODIFIERS R_abstract_strictfp
+        ;
+
+
+//слой 2
+R_access_staticfinal:
+        R_method_varaible
+        |
+        R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_access_staticfinal_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_defin_var1
+        |
+        T_NATIVE_MODIFIERS R_method_abstract
+        |
+        T_STRICTFP_MODIFIERS R_access_staticfinal_strictfp
+        ;
+
+R_access_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_access_staticfinal_abstract
+        |
+        T_NATIVE_MODIFIERS R_access_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_access_abstract_strictfp
+        ;
+
+R_access_transient:
+        R_defin_var1
+        |
+        T_STATIC_FINAL_MODIFIERS R_defin_var1
+        ;
+
+R_access_native:
+        R_method_abstract//абстраткт так как нативный метод не имеет тела
+        |
+        T_STATIC_FINAL_MODIFIERS R_method_abstract
+        ;
+
+R_access_strictfp:
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS T_STATIC_FINAL_MODIFIERS R_class_interface
+        ;
+
+R_staticfinal_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access_staticfinal_abstract
+        |
+        T_NATIVE_MODIFIERS R_staticfinal_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_staticfinal_abstract_strictfp
+        ;
+
+R_staticfinal_transient:
+        R_defin_var1
+        |
+        T_ACCESS_MODIFIERS R_defin_var1
+        ;
+
+R_staticfinal_native:
+        R_method_abstract//абстраткт так как нативный метод не имеет тела
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        ;
+
+R_staticfinal_strictfp:
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS T_ACCESS_MODIFIERS R_class_interface
+        ;
+
+R_abstract_native:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_staticfinal_abstract_native
+        |
+        T_ACCESS_MODIFIERS R_access_abstract_native
+        ;
+
+R_abstract_strictfp:
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS R_class_interface
+        ;
+
+
+//слой 3
+R_access_staticfinal_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_NATIVE_MODIFIERS R_method_abstract
+        |
+        T_STRICTFP_MODIFIERS R_class_interface
+        ;
+
+R_access_staticfinal_strictfp:
+        R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        ;
+
+R_access_abstract_native:
+        R_method_abstract
+        |
+        T_STATIC_FINAL_MODIFIERS R_method_abstract
+        ;
+
+R_access_abstract_strictfp:
+        R_class_interface
+        |
+        T_STATIC_FINAL_MODIFIERS R_class_interface
+        ;
+
+R_staticfinal_abstract_native:
+        R_method_abstract
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        ;
+
+R_staticfinal_abstract_strictfp:
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        ;
+
+
+
+
+
+
+
+
+
+R_method_abstract://разные типы
+        T_IDENTIFIER T_IDENTIFIER R_defin_method_abstract
+        |
+        T_DATA_TYPE T_IDENTIFIER R_defin_method_abstract
+        |
+        T_DATA_TYPE_METHOD T_IDENTIFIER R_defin_method_abstract
+        ;
+
+R_defin_var1:
+        T_IDENTIFIER T_IDENTIFIER R_defin_var//всё ещё не понятно переменная или метод
+        |
+        T_DATA_TYPE T_IDENTIFIER R_defin_var//всё ещё не понятно переменная или метод
+        |
+        T_DATA_TYPE_VARAIBLE T_IDENTIFIER R_defin_var//точно переменная
+        ;
+
+R_method_varaible://пеменная или метод
+        T_IDENTIFIER T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
+        |
+        T_DATA_TYPE T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
+        |
+        T_DATA_TYPE_VARAIBLE T_IDENTIFIER R_defin_var//точно переменная
+        |
+        T_DATA_TYPE_METHOD T_IDENTIFIER R_defin_method//точно метод
+        ;
+
+R_method_or_var:
+        R_defin_method
+        |
+        R_defin_var//точно переменная
+        ;
+
+R_defin_method_abstract:
+        T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET T_SEMICOLON
+        ;
+
+R_defin_method:
+        T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET T_OPEN_BRACE R_Body_Method T_CLOSE_BRACKET//точно метод
+        |
+        R_defin_method_abstract
+        ;
+
+R_defin_var:
+        R_comma_next_var2 R_comma_next_var T_SEMICOLON//возможно несолько переменных одного типа
+        ;
+
+R_comma_next_var://несолько переменных одного типа через запятую
+        |
+        T_COMMA R_TypeField T_IDENTIFIER R_comma_next_var2 R_comma_next_var
+        ;
+
+R_comma_next_var2://возможно присвоение
+        |
+        T_ASSIGNMENT R_Expression
+        ;
+
+//++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+R_ModifiersClass:
+        |
+        T_ACCESS_MODIFIERS
+        |
+        T_STATIC_FINAL_MODIFIERS
+        |
+        T_ABSTRACT_MODIFIERS
+        |
+        T_STRICTFP_MODIFIERS
+
+        |
+        T_STATIC_FINAL_MODIFIERS T_ACCESS_MODIFIERS
+        |
+        T_ABSTRACT_MODIFIERS T_ACCESS_MODIFIERS
+        |
+        T_STRICTFP_MODIFIERS T_ACCESS_MODIFIERS
+
+        |
+        T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS
+        |
+        T_ABSTRACT_MODIFIERS T_STATIC_FINAL_MODIFIERS
+        |
+        T_STRICTFP_MODIFIERS T_STATIC_FINAL_MODIFIERS
+
+        |
+        T_ACCESS_MODIFIERS T_ABSTRACT_MODIFIERS
+        |
+        T_STATIC_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS
+        |
+        T_STRICTFP_MODIFIERS T_ABSTRACT_MODIFIERS
+
+        |
+        T_ACCESS_MODIFIERS T_STRICTFP_MODIFIERS
+        |
+        T_STATIC_FINAL_MODIFIERS T_STRICTFP_MODIFIERS
+        |
+        T_ABSTRACT_MODIFIERS T_STRICTFP_MODIFIERS
+        ;
+
+R_ModifierClass:
+        T_ACCESS_MODIFIERS
+        |
+        T_STATIC_FINAL_MODIFIERS
+        |
+        T_ABSTRACT_MODIFIERS
+        |
+        T_STRICTFP_MODIFIERS
+        ;
+
+//R_Class:
+//        R_ModifiersClass T_CLASS T_IDENTIFIER T_OPEN_BRACE R_BodyClass T_CLOSE_BRACE
+//        ;
+
+//R_ModifiersFields:
+//        |
+//        R_ModifiersFields R_ModifiersField
+//        ;
+//
+//R_ModifiersField:
+//        T_ACCESS_MODIFIERS
+//        |
+//        T_STATIC_FINAL_MODIFIERS
+//        |
+//        T_TRANSIENT_MODIFIERS
+//        ;
+
+R_BinarySign:
+        T_BINARY_SIGN
+        |
+        T_STAR
+        |
+        T_MINUS
+        |
+        T_PLUS
+        |
+        T_COMPARISON_SIGN
+        ;
+
+R_UnarySign:
+        T_MINUS
+        |
+        T_PLUS
+        |
+        T_UNARY_SIGN_ONLY
+        ;
+
+R_Strings:
+        T_STRING
+        |
+        R_Strings T_PLUS T_STRING
+        |
+        R_Strings T_PLUS T_IDENTIFIER
+        ;
+
+R_Value:
+        T_IDENTIFIER
+        |
+        T_NUMBER
+        |
+        R_Strings
+        |
+        T_FLOAT
+        ;
+
+R_Expression:
+        R_UnarySign R_Expression
+        |
+        R_Value
+        |
+        T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET
+        |
+        R_Expression R_BinarySign R_Expression
+        ;
+
+R_TypeField:
+        T_DATA_TYPE
+        |
+        T_DATA_TYPE_VARAIBLE
+        |
+        T_IDENTIFIER
+        ;
+//
+//R_Fields:
+//        R_ModifiersField R_TypeField T_IDENTIFIER T_SEMICOLON
+//        |
+//        R_ModifiersField R_TypeField T_IDENTIFIER T_ASSIGNMENT R_Expression T_SEMICOLON
+//        ;
+//
+//R_ModifiersMethods:
+//        |
+//        R_ModifiersMethods R_ModifiersMethod
+//        ;
+//
+//R_ModifiersMethod:
+//        T_STATIC_FINAL_MODIFIERS
+//        |
+//        T_NATIVE_MODIFIERS
+//        |
+//        T_ABSTRACT_MODIFIERS
+//        ;
+//
+//R_TypeMethod:
+//        T_DATA_TYPE
+//        |
+//        T_DATA_TYPE_METHOD
+//        |
+//        T_IDENTIFIER
+//        ;
+
+R_Arguments:
+        |
+        R_Arguments T_COMMA R_TypeField T_IDENTIFIER
+        |
+        R_TypeField T_IDENTIFIER
+        ;
+
+R_BodyMethod:
+        R_Commands
+        ;
+
+R_Commands:
+        |
+        R_Commands R_Command
+        ;
+
+R_ArgumentsCall:
+        |
+        R_ArgumentsCall T_COMMA R_Value
+        |
+        R_Value
+        ;
+
+R_Call:
+        T_IDENTIFIER T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
+        ;
+
+R_Command:
+        R_Expression T_SEMICOLON
+        |
+        R_Cycle
+        |
+        R_Call T_SEMICOLON
+        |
+        R_If
+        ;
+
+R_If:
+        T_IF T_OPEN_BRACKET R_Cond T_CLOSE_BRACKET R_Body
+        |
+        T_IF T_OPEN_BRACKET R_Cond T_CLOSE_BRACKET R_Body T_ELSE R_Body
+        ;
+
+R_Cycle:
+        T_WHILE T_OPEN_BRACKET R_Cond T_CLOSE_BRACKET R_Body
+        ;
+
+R_Cond:
+        R_Expression
+        ;
+
+R_Body:
+        T_OPEN_BRACE R_Commands T_CLOSE_BRACE
+        |
+        R_Command
+        ;
+
+R_Methods:
+        R_ModifiersMethod R_TypeMethod T_IDENTIFIER T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET T_OPEN_BRACE R_BodyMethod T_CLOSE_BRACE
+        ;
+
+R_BodyClass:
+        T_OPEN_BRACE R_BodyClass2 T_CLOSE_BRACKET
+        ;
+
+R_BodyClass2:
+        |
+        R_BodyClass2 R_Modifiers
+        ;
+
+%%
+
+int main(int argc, char const *argv[]){
+    yylval=1;
+    return yyparse();
+}
