@@ -50,9 +50,9 @@ R_NamePacket:
         ;
 
 R_Import:
-        T_IMPORT T_IDENTIFIER 
-        |
         T_IMPORT T_IDENTIFIER R_NamePacket T_DOT T_STAR
+        |
+        T_IMPORT T_IDENTIFIER R_NamePacket
         ;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
@@ -392,6 +392,8 @@ R_defin_method:
 
 R_defin_var:
         R_comma_next_var2 R_comma_next_var T_SEMICOLON//возможно несолько переменных одного типа
+        |
+        R_comma_next_var2 R_comma_next_var
         ;
 
 R_comma_next_var://несолько переменных одного типа через запятую
@@ -402,6 +404,8 @@ R_comma_next_var://несолько переменных одного типа �
 R_comma_next_var2://возможно присвоение
         |
         T_ASSIGNMENT R_Expression
+        |
+        T_ASSIGNMENT T_OPEN_BRACE R_ArgumentsCall T_CLOSE_BRACE
         ;
 
 //++++++++++++++++++++++++++++++++++++++++++++++++
@@ -430,6 +434,8 @@ R_Value:
         R_Strings
         |
         T_FLOAT
+        |
+        T_TRUE_FALSE
         ;
 
 R_TypeField:
@@ -465,10 +471,6 @@ R_ArgumentsCall:
         R_Expression
         ;
 
-// R_Call:
-//         T_IDENTIFIER T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
-        // ;
-
 R_Expression:
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET
         |
@@ -479,6 +481,13 @@ R_Expression:
         R_number
         |
         R_sign
+        |
+        T_NEW R_TypeField R_Repeat_square_bracket R_Call_methods T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
+        |
+        T_NEW R_TypeField R_Repeat_square_bracket R_Call_methods
+        |
+        R_Expression T_QUERY R_Expression T_COLON R_Expression
+
         ;
 
 R_assignment_sign:
@@ -495,21 +504,22 @@ R_first_varaible:
 
 R_Call_methods:
         |
-        T_DOT T_IDENTIFIER R_Repeat_square_bracket R_Call_methods
+        T_DOT T_IDENTIFIER R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
         ;
 
 R_varaible:
-        T_IDENTIFIER R_Repeat_square_bracket
+        T_IDENTIFIER R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
         |
-        T_IDENTIFIER R_Repeat_square_bracket R_Call_methods T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
-        |
-        T_IDENTIFIER R_Repeat_square_bracket R_Call_methods T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
-        |
-        T_IDENTIFIER R_Repeat_square_bracket R_all_binary_sign R_next_Expression
+        T_IDENTIFIER R_Repeat_bracket R_Repeat_square_bracket R_Call_methods R_all_binary_sign R_next_Expression
         |
         T_IDENTIFIER R_Repeat_square_bracket T_INCREMENT_DECREMENT_SIGN
         |
         T_IDENTIFIER R_Repeat_square_bracket T_INCREMENT_DECREMENT_SIGN R_all_binary_sign R_next_Expression
+        ;
+
+R_Repeat_bracket:
+        |
+        T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
         ;
 
 R_number:
@@ -527,20 +537,14 @@ R_sign:
         ;
 
 R_next_Expression:
-        //T_OPEN_BRACKET R_next_Expression T_CLOSE_BRACKET
-        //|
-        //T_OPEN_BRACKET R_next_Expression T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
-        //|
         R_varaible
         |
         R_number
         |
         R_sign
         |
-        //T_OPEN_BRACKET T_VARIABLE R_assignment_sign R_Expression T_CLOSE_BRACKET
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET
         |
-        //T_OPEN_BRACKET T_VARIABLE R_assignment_sign R_Expression T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
         ;
 
@@ -551,10 +555,12 @@ R_Command:
         R_Modifiers
         |
         R_Cycle
-        //|
-        //R_Call T_SEMICOLON
         |
         R_If
+        |
+        T_ASSERT R_Expression T_SEMICOLON
+        |
+        T_ASSERT R_Expression T_COLON R_Expression T_SEMICOLON
         ;
 
 R_If:
@@ -565,6 +571,8 @@ R_If:
 
 R_Cycle:
         T_FOR T_OPEN_BRACKET R_Initialization_for R_Cond_for T_SEMICOLON R_Cond_for T_CLOSE_BRACKET R_Body
+        |
+        T_FOR T_OPEN_BRACKET R_Initialization_for T_COLON R_Expression T_CLOSE_BRACKET R_Body
         |
         T_WHILE T_OPEN_BRACKET R_Cond T_CLOSE_BRACKET R_Body
         |
@@ -593,27 +601,23 @@ R_Body:
 
 
 R_all_binary_sign:
-    R_unary_sign
-    |
-    R_binary_sign
-    |
-    R_comparison_sign
-    ;
+        R_unary_sign
+        |
+        R_binary_sign
+        |
+        R_comparison_sign
+        ;
 
 
 R_binary_sign:
-    T_BINARY_SIGN
-    |
-    T_STAR
-    ;
+        T_BINARY_SIGN
+        |
+        T_STAR
+        ;
 
 R_comparison_sign:
-    T_COMPARISON_SIGN
-    ;
-
-//R_Methods:
-//        R_ModifiersMethod R_TypeMethod T_IDENTIFIER T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET T_OPEN_BRACE R_BodyMethod T_CLOSE_BRACE
-//        ;
+        T_COMPARISON_SIGN
+        ;
 
 R_BodyClass:
         T_OPEN_BRACE R_BodyClass2 T_CLOSE_BRACE
