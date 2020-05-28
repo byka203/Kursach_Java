@@ -9,4 +9,4 @@ debug:
 	cc lex.yy.c y.tab.c -o Java.out
 
 run:
-	./Java.out < Java.java
+	./Java.out < test.z
