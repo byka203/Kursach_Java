@@ -21,7 +21,7 @@ int yywrap(){
 
 
 %start R_Programm
-%token T_STAR T_IMPORT T_PACKAGE T_CLASS T_INTERFACE T_DATA_TYPE T_DATA_TYPE_VARAIBLE T_DATA_TYPE_METHOD T_ENUM T_ACCESS_MODIFIERS T_STATIC_MODIFIERS T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS T_TRANSIENT_MODIFIERS T_NATIVE_MODIFIERS T_STRICTFP_MODIFIERS T_STREAM_MODIFIERS T_EXTENDS T_IMPLEMENTS T_THROW T_TRUE_FALSE T_IF T_ELSE T_SWITCH T_CASE T_DEFAULT T_TRY T_CATCH T_THROWS T_FINALLY T_FOR T_DO T_WHILE T_BREAK T_CONTINUE T_NEW T_SUPER T_THIS T_ASSERT T_INSTACEOF T_RETURN T_INCREMENT_DECREMENT_SIGN T_UNARY_SIGN_ONLY T_COMPARISON_SIGN T_BINARY_SIGN T_ASSIGNMENT T_OPEN_BRACKET T_CLOSE_BRACKET T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET T_OPEN_BRACE T_CLOSE_BRACE T_SEMICOLON T_DOT T_COMMA T_QUERY T_COLON T_FLOAT T_STRING T_NUMBER T_IDENTIFIER T_MINUS T_PLUS T_ASSIGNMENT2
+%token T_STAR T_IMPORT T_PACKAGE T_CLASS T_INTERFACE T_DATA_TYPE T_DATA_TYPE_VARIABLE T_DATA_TYPE_METHOD T_ENUM T_ACCESS_MODIFIERS T_STATIC_MODIFIERS T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS T_TRANSIENT_MODIFIERS T_NATIVE_MODIFIERS T_STRICTFP_MODIFIERS T_STREAM_MODIFIERS T_EXTENDS T_IMPLEMENTS T_THROW T_TRUE_FALSE T_IF T_ELSE T_SWITCH T_CASE T_DEFAULT T_TRY T_CATCH T_THROWS T_FINALLY T_FOR T_DO T_WHILE T_BREAK T_CONTINUE T_NEW T_SUPER T_THIS T_ASSERT T_INSTACEOF T_RETURN T_INCREMENT_DECREMENT_SIGN T_UNARY_SIGN_ONLY T_COMPARISON_SIGN T_BINARY_SIGN T_ASSIGNMENT T_OPEN_BRACKET T_CLOSE_BRACKET T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET T_OPEN_BRACE T_CLOSE_BRACE T_SEMICOLON T_DOT T_COMMA T_QUERY T_COLON T_FLOAT T_STRING T_NUMBER T_IDENTIFIER T_MINUS T_PLUS T_ASSIGNMENT2
 
 %%
 R_Programm:
@@ -82,7 +82,7 @@ R_class_interface:
 
 //слой 0
 R_Modifiers:
-        R_method_varaible
+        R_method_variable
         |
         R_class_interface
         |
@@ -104,7 +104,7 @@ R_Modifiers:
 
 //слой 1
 R_access://модификатор доступа может быть у классов, методов, переменных
-        R_method_varaible//только модификатор доступа затем тип
+        R_method_variable//только модификатор доступа затем тип
         |
         R_class_interface
         |
@@ -122,7 +122,7 @@ R_access://модификатор доступа может быть у клас
         ;
 
 R_static:
-        R_method_varaible
+        R_method_variable
         |
         R_class_interface
         |
@@ -140,7 +140,7 @@ R_static:
         ;
 
 R_final:
-        R_method_varaible
+        R_method_variable
         |
         R_class_interface
         |
@@ -162,11 +162,11 @@ R_abstract:
         |
         R_class_interface
         |
+        T_ACCESS_MODIFIERS R_access_abstract
+        |
         T_STATIC_MODIFIERS R_static_abstract
         |
         T_FINAL_MODIFIERS R_final_abstract
-        |
-        T_ACCESS_MODIFIERS R_access_abstract
         |
         T_NATIVE_MODIFIERS R_abstract_native
         |
@@ -181,17 +181,6 @@ R_transient:
         T_STATIC_MODIFIERS R_static_transient
         |
         T_FINAL_MODIFIERS R_final_transient
-        // R_defin_var1//только модификатор transient затем тип
-        // |
-        // T_ACCESS_MODIFIERS R_defin_var1//втроой модификатор - доступа
-        // |
-        // T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS R_defin_var1//втроой модификатор - доступа, третий модификатор - подходит для классов, методов, переменных
-        // |
-        // T_ACCESS_MODIFIERS T_STATIC_FINAL_MODIFIERS R_defin_var1//втроой модификатор - доступа, третий модификатор - подходит для классов, методов, переменных
-        // |
-        // T_STATIC_FINAL_MODIFIERS R_defin_var1//втроой модификатор - подходит для классов, методов, переменных
-        // |
-        // T_STATIC_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_defin_var1//втроой модификатор - подходит для классов, методов, переменных, третий модификатор - доступа
         ;
 
 R_native:
@@ -219,13 +208,13 @@ R_strictfp:
 
 //слой 2
 R_access_static:
-        R_method_varaible
+        R_method_variable
         |
         R_class_interface
         |
-        T_ABSTRACT_MODIFIERS R_access_static_abstract
-        |
         T_FINAL_MODIFIERS R_access_static_final
+        |
+        T_ABSTRACT_MODIFIERS R_access_static_abstract
         |
         T_TRANSIENT_MODIFIERS R_access_static_transient
         |
@@ -235,13 +224,13 @@ R_access_static:
         ;
 
 R_access_final:
-        R_method_varaible
+        R_method_variable
         |
         R_class_interface
         |
-        T_ABSTRACT_MODIFIERS R_access_final_abstract
-        |
         T_STATIC_MODIFIERS R_access_static_final
+        |
+        T_ABSTRACT_MODIFIERS R_access_final_abstract
         |
         T_TRANSIENT_MODIFIERS R_access_final_transient
         |
@@ -295,7 +284,23 @@ R_access_strictfp:
         |
         T_FINAL_MODIFIERS  R_access_final_strictfp
         |
-        T_ABSTRACT_MODIFIERS R_access_strictfp_abstract
+        T_ABSTRACT_MODIFIERS R_access_abstract_strictfp
+        ;
+
+R_static_final:
+        R_method_variable
+        |
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access_static_final
+        |
+        T_ABSTRACT_MODIFIERS R_static_final_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_static_final_transient
+        |
+        T_NATIVE_MODIFIERS R_static_final_native
+        |
+        T_STRICTFP_MODIFIERS R_static_final_strictfp
         ;
 
 R_static_abstract:
@@ -303,9 +308,9 @@ R_static_abstract:
         |
         R_class_interface
         |
-        T_FINAL_MODIFIERS R_static_abstract_final
-        |
         T_ACCESS_MODIFIERS R_access_static_abstract
+        |
+        T_FINAL_MODIFIERS R_static_final_abstract
         |
         T_NATIVE_MODIFIERS R_static_abstract_native
         |
@@ -341,32 +346,17 @@ R_static_strictfp:
         |
         T_ACCESS_MODIFIERS R_access_static_strictfp
         |
-        T_FINAL_MODIFIERS R_static_strictfp_final
+        T_FINAL_MODIFIERS R_static_final_strictfp
         |
-        T_ABSTRACT_MODIFIERS R_static_strictfp_abstract
+        T_ABSTRACT_MODIFIERS R_static_abstract_strictfp
         ;
-
-R_static_final: 
-        R_method_varaible
-        |
-        R_class_interface
-        |
-        T_ACCESS_MODIFIERS R_access_static_final
-        |
-        T_ABSTRACT_MODIFIERS R_static_abstract_final
-        |
-        T_TRANSIENT_MODIFIERS R_static_final_transient
-        |
-        T_NATIVE_MODIFIERS R_static_final_native
-        |
-        T_STRICTFP_MODIFIERS R_static_strictfp_final
 
 R_final_abstract:
         R_method_abstract
         |
         R_class_interface
         |
-        T_STATIC_MODIFIERS R_static_abstract_final
+        T_STATIC_MODIFIERS R_static_final_abstract
         |
         T_ACCESS_MODIFIERS R_access_final_abstract
         |
@@ -402,11 +392,11 @@ R_final_native:
 R_final_strictfp:
         R_class_interface
         |
-        T_ACCESS_MODIFIERS R_access_final_strictfpss
+        T_ACCESS_MODIFIERS R_access_final_strictfp
         |
-        T_STATIC_MODIFIERS R_static_strictfp_final
+        T_STATIC_MODIFIERS R_static_final_strictfp
         |
-        T_ABSTRACT_MODIFIERS R_final_strictfp_abstract
+        T_ABSTRACT_MODIFIERS R_final_abstract_strictfp
         ;
 
 R_abstract_native:
@@ -433,30 +423,221 @@ R_abstract_strictfp:
 
 
 //слой 3
+R_access_static_final:
+        R_method_variable
+        |
+        R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_access_static_final_abstract
+        |
+        T_TRANSIENT_MODIFIERS R_defin_var1
+        |
+        T_NATIVE_MODIFIERS R_access_static_final_native
+        |
+        T_STRICTFP_MODIFIERS R_access_static_final_strictfp
+        ;
+
+R_access_static_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_FINAL_MODIFIERS R_access_static_final_abstract
+        |
+        T_NATIVE_MODIFIERS R_access_static_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_access_static_abstract_strictfp
+        ;
+
+R_access_static_transient:
+        R_defin_var1
+        |
+        T_FINAL_MODIFIERS R_defin_var1
+        ;
+
+R_access_static_native:
+        R_method_abstract
+        |
+        T_FINAL_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS T_FINAL_MODIFIERS R_method_abstract
+        ;
+
+R_access_static_strictfp:
+        R_class_interface
+        |
+        T_FINAL_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS T_FINAL_MODIFIERS R_class_interface
+        ;
+
+R_access_final_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_STATIC_MODIFIERS R_access_static_final_abstract
+        |
+        T_NATIVE_MODIFIERS R_access_final_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_access_final_abstract_strictfp
+        ;
+
+R_access_final_transient:
+        R_defin_var1
+        |
+        T_STATIC_MODIFIERS R_defin_var1
+        ;
+
+R_access_final_native:
+        R_method_abstract
+        |
+        T_STATIC_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_STATIC_MODIFIERS T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS T_STATIC_MODIFIERS R_method_abstract
+        ;
+
+R_access_final_strictfp:
+        R_class_interface
+        |
+        T_STATIC_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_STATIC_MODIFIERS T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS T_STATIC_MODIFIERS R_class_interface
+        ;
+
+R_access_abstract_native:
+        R_method_abstract
+        |
+        T_STATIC_MODIFIERS R_method_abstract
+        |
+        T_FINAL_MODIFIERS R_method_abstract
+        |
+        T_STATIC_MODIFIERS T_FINAL_MODIFIERS R_method_abstract
+        |
+        T_FINAL_MODIFIERS T_STATIC_MODIFIERS R_method_abstract
+        ;
+
+R_access_abstract_strictfp:
+        R_class_interface
+        |
+        T_STATIC_MODIFIERS R_class_interface
+        |
+        T_FINAL_MODIFIERS R_class_interface
+        |
+        T_STATIC_MODIFIERS T_FINAL_MODIFIERS R_class_interface
+        |
+        T_FINAL_MODIFIERS T_STATIC_MODIFIERS R_class_interface
+        ;
+
+R_static_final_abstract:
+        R_method_abstract
+        |
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_access_static_final_abstract
+        |
+        T_NATIVE_MODIFIERS R_static_final_abstract_native
+        |
+        T_STRICTFP_MODIFIERS R_static_final_abstract_strictfp
+        ;
+
+R_static_final_transient:
+        R_defin_var1
+        |
+        T_ACCESS_MODIFIERS R_defin_var1
+        ;
+
+R_static_final_native:
+        R_method_abstract
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_ACCESS_MODIFIERS T_ABSTRACT_MODIFIERS R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS T_ACCESS_MODIFIERS R_method_abstract
+        ;
+
+R_static_final_strictfp:
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS T_ABSTRACT_MODIFIERS R_class_interface
+        |
+        T_ABSTRACT_MODIFIERS T_ACCESS_MODIFIERS R_class_interface
+        ;
+
+R_static_abstract_native:
+        R_method_abstract
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        |
+        T_FINAL_MODIFIERS R_method_abstract
+        |
+        T_ACCESS_MODIFIERS T_FINAL_MODIFIERS R_method_abstract
+        |
+        T_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_method_abstract
+        ;
+
+R_static_abstract_strictfp:
+        R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_FINAL_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS T_FINAL_MODIFIERS R_class_interface
+        |
+        T_FINAL_MODIFIERS T_ACCESS_MODIFIERS R_class_interface
+        ;
+
+R_final_abstract_native:
+        R_method_abstract
+        |
+        T_STATIC_MODIFIERS R_method_abstract
+        |
+        T_ACCESS_MODIFIERS R_method_abstract
+        |
+        T_STATIC_MODIFIERS T_ACCESS_MODIFIERS R_method_abstract
+        |
+        T_ACCESS_MODIFIERS T_STATIC_MODIFIERS R_method_abstract
+        ;
+
+R_final_abstract_strictfp:
+        R_class_interface
+        |
+        T_STATIC_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_STATIC_MODIFIERS T_ACCESS_MODIFIERS R_class_interface
+        |
+        T_ACCESS_MODIFIERS T_STATIC_MODIFIERS R_class_interface
+        ;
 
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-R_access_staticfinal_abstract:
+//слой4
+R_access_static_final_abstract:
         R_method_abstract
         |
         R_class_interface
@@ -466,35 +647,62 @@ R_access_staticfinal_abstract:
         T_STRICTFP_MODIFIERS R_class_interface
         ;
 
-R_access_staticfinal_strictfp:
+R_access_static_final_native:
+        R_method_abstract
+        |
+        T_ABSTRACT_MODIFIERS R_method_abstract
+        ;
+
+R_access_static_final_strictfp:
         R_class_interface
         |
         T_ABSTRACT_MODIFIERS R_class_interface
         ;
 
-R_access_abstract_native:
+R_access_static_abstract_native:
         R_method_abstract
         |
-        T_STATIC_FINAL_MODIFIERS R_method_abstract
+        T_FINAL_MODIFIERS R_method_abstract
         ;
 
-R_access_abstract_strictfp:
+R_access_static_abstract_strictfp:
         R_class_interface
         |
-        T_STATIC_FINAL_MODIFIERS R_class_interface
+        T_FINAL_MODIFIERS R_class_interface
         ;
 
-R_staticfinal_abstract_native:
+R_access_final_abstract_native:
+        R_method_abstract
+        |
+        T_STATIC_MODIFIERS R_method_abstract
+        ;
+
+R_access_final_abstract_strictfp:
+        R_class_interface
+        |
+        T_STATIC_MODIFIERS R_class_interface
+        ;
+
+R_static_final_abstract_native:
         R_method_abstract
         |
         T_ACCESS_MODIFIERS R_method_abstract
         ;
 
-R_staticfinal_abstract_strictfp:
+R_static_final_abstract_strictfp:
         R_class_interface
         |
         T_ACCESS_MODIFIERS R_class_interface
         ;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -523,15 +731,15 @@ R_defin_var1:
         |
         T_DATA_TYPE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE_VARAIBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
+        T_DATA_TYPE_VARIaBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
         ;
 
-R_method_varaible://пеменная или метод
+R_method_variable://пеменная или метод
         T_IDENTIFIER R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
         |
         T_DATA_TYPE R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE_VARAIBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
+        T_DATA_TYPE_VARIaBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
         |
         T_DATA_TYPE_METHOD T_IDENTIFIER R_defin_method//точно метод
         ;
@@ -605,7 +813,7 @@ R_Value:
 R_TypeField:
         T_DATA_TYPE
         |
-        T_DATA_TYPE_VARAIBLE
+        T_DATA_TYPE_VARIaBLE
         |
         T_IDENTIFIER
         ;
@@ -638,7 +846,7 @@ R_Expression:
         |
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
         |
-        R_first_varaible
+        R_first_variable
         |
         R_number
         |
@@ -658,8 +866,8 @@ R_assignment_sign:
         T_ASSIGNMENT2
         ;
 
-R_first_varaible:
-        R_varaible
+R_first_variable:
+        R_variable
         |
         T_IDENTIFIER R_Repeat_square_bracket R_assignment_sign R_Expression
         ;
@@ -671,7 +879,7 @@ R_Call_methods:
         T_DOT T_IDENTIFIER R_Repeat_square_bracket R_Call_methods
         ;
 
-R_varaible:
+R_variable:
         T_IDENTIFIER R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
         |
         T_IDENTIFIER R_Repeat_square_bracket R_Call_methods
@@ -704,7 +912,7 @@ R_sign:
         ;
 
 R_next_Expression:
-        R_varaible
+        R_variable
         |
         R_number
         |
