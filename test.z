@@ -1,114 +1,147 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
+package Fall0811;
 
+import java.util.Iterator;
 
-public class FreqTableExampleOriginal {
+import Summer08.Node;
 
-    public static final int NUM_ASCII_CHAR = 128;
-
-    public static void main(String[] args)
-        {
-
-        int[] freqs = createFreqTableURL("http://www.utexas.edu/");
-
-        if( freqs.length == 0)
-            System.out.println("No frequency table created due to problems when reading from file");
+public class LinkedList implements Iterable {
+    private Node head;
+    private Node tail;
+    private int size;
+    
+    public Iterator iterator(){
+        return new LLIterator();
+    }
+    
+    private class LLIterator implements Iterator{
+        private Node nextNode;
+        private boolean removeOK;
+        private int posToRemove;
+        
+        private LLIterator(){
+            nextNode = head;
+            removeOK = false;
+            posToRemove = -1;
+        }
+        
+        public boolean hasNext(){
+            return nextNode != null;
+        }
+        
+        public Object next(){
+            assert hasNext();
+            
+            Object result = nextNode.getData();
+            nextNode = nextNode.getNext();
+            
+            removeOK = true;
+            posToRemove++;
+            
+            return result;
+        }
+        
+        public void remove(){
+            assert removeOK;
+            removeOK = false;
+            LinkedList.this.remove(posToRemove);
+            posToRemove--;
+        }
+    }
+    
+    public void makeEmpty(){
+        
+        head = tail = null;
+        size = 0;
+    }
+    
+    public Object remove(int pos){
+        assert pos >= 0 && pos < size;
+        Object result;
+        if( pos == 0 ){
+            result = head.getData();
+            head = head.getNext();
+            if( size == 1 )
+                tail = null;
+        }
+        else{    
+            Node temp = head;
+            for(int i = 1; i < pos; i++)
+                temp = temp.getNext();
+            result = temp.getNext().getData();
+            temp.setNext( temp.getNext().getNext() );
+            if( pos == size - 1)
+                tail = temp;
+        }
+        size--;
+        return result;
+    }
+    
+    public Object get(int pos){
+        assert pos >= 0 && pos < size;
+        
+        
+        Object result;
+        if( pos == size - 1 )
+            result = tail.getData(); 
         else{
-            for(int i = 0; i < NUM_ASCII_CHAR; i++){
-                System.out.println("charcater code: " + i + " ,character: " + (char)i + " ,frequency: " + freqs[i]);
-            }
-            System.out.println("Total characters in file: " + sum(freqs));
+            Node temp = head;
+            for(int i = 0; i < pos; i++)
+                temp = temp.getNext();
+            result = temp.getData();
+            
         }
-
-
-        freqs = new int[]{};
-        try{
-            freqs = createTable("ciaFactBook2008.txt");
-        }
-        catch(FileNotFoundException e){
-            System.out.println("File not found. Unable to create freq table" + e);
-        }
-        catch(IOException e){
-            System.out.println("Problem while reading from file. Unable to create freq table" + e);
-        }
-        if( freqs.length == 0)
-            System.out.println("No frequency table created due to problems when reading from file");
+        return result;
+    }
+    
+    public void insert(int pos, Object obj){
+        assert pos >= 0 && pos <= size;
+        
+        
+        if(pos == 0)
+            addFirst(obj); 
+        
+        else if( pos == size )
+            add(obj); 
         else{
-            for(int i = 0; i < freqs.length; i++){
-                System.out.println("charcater code: " + i + " ,character: " + (char)i + " ,frequency: " + freqs[i]);
-            }
-            System.out.println("Total characters in file: " + sum(freqs));
+            
+            Node temp = head;
+            for(int i = 1; i < pos; i++)
+                temp = temp.getNext();
+            
+            
+            Node newNode = new Node(obj, temp.getNext());
+            temp.setNext( newNode );
+            size++;
         }
-
     }
-
-    private static int sum(int[] list) {
-        assert list != null : "Failed precondition, sum: parameter list" +
-            " may not be null.";
-        int total = 0;
-        for(int x : list){
-            total += x;
-        }
-        return total;
+    
+    public void add(Object obj){
+        Node newNode = new Node(obj, null);
+        if( size == 0 )
+            head = newNode;
+        else
+            tail.setNext(newNode);
+        tail = newNode;
+        size++;
     }
-
-    public static int[] createFreqTableURL (String url){
-        if(url == null)
-            throw new IllegalArgumentException("Violation of precondition. parameter url must not be null.");
-
-        int[] freqs = new int[NUM_ASCII_CHAR];
-        try {
-        URL inputURL = new URL(url);
-        InputStreamReader in
-            = new InputStreamReader(inputURL.openStream());
-
-        while(in.ready()){
-            int c = in.read();
-            if(0 <= c && c < freqs.length)
-                freqs[c]++;
-            else
-                System.out.println("Non ASCII char: " + c + " " + (char) c);
+    
+    public void addFirst(Object obj){
+        if(size == 0)
+            add(obj);
+        else{
+            Node newNode = new Node(obj, head);
+            head = newNode;
+            size++;
         }
-        in.close();
-        }
-        catch(MalformedURLException e){
-            System.out.println("Bad URL.");
-            freqs = new int[0];
-        }
-        catch(IOException e){
-            System.out.println("Unable to read from resource." + e);
-            freqs = new int[0];
-        }
-        return freqs;
     }
-
-
-    public static int[] createTable(String fileName) throws FileNotFoundException, IOException{
-        int[] freqs = new int[NUM_ASCII_CHAR];
-        File f = new File(fileName);
-        FileReader r = new FileReader(f);
-        while( r.ready() ){
-            int ch = r.read();
-            if(0 <= ch && ch < freqs.length)
-                freqs[ch]++;
-            else
-                System.out.println((char) ch);
-                
+    
+    public String toString(){
+        String result = "";
+        Node temp = head;
+        for(int i = 0; i < size; i++){
+            result += temp.getData() + " ";
+            temp = temp.getNext();
         }
-        r.close();
-        return freqs;
+        return result;
     }
-
-
-
-
-
-
-
-
 }

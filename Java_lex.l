@@ -13,7 +13,7 @@
 "interface"                                         return T_INTERFACE;
 
 "byte"|"boolean"|"char"|"double"|"float"|"int"|"long"|"short"|"String" return T_DATA_TYPE;
-"var"                                               return T_DATA_TYPE_VARAIBLE;
+"var"                                               return T_DATA_TYPE_VARIABLE;
 "void"                                              return T_DATA_TYPE_METHOD;
 
 "enum"                                              return T_ENUM;

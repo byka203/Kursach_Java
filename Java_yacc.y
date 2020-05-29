@@ -55,7 +55,6 @@ R_Import:
         T_IMPORT T_IDENTIFIER R_NamePacket
         ;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 R_EXTENDS://наследование
@@ -697,25 +696,12 @@ R_static_final_abstract_strictfp:
 
 
 
-
-
-
-
-
-
-
-
-
-
 R_Repeat_square_bracket:
         |
         T_OPEN_SQUARE_BRACKET R_Expression T_CLOSE_SQUARE_BRACKET R_Repeat_square_bracket
         |
         T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET R_Repeat_square_bracket
         ;
-
-
-
 
 
 R_method_abstract://разные типы
@@ -731,7 +717,7 @@ R_defin_var1:
         |
         T_DATA_TYPE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE_VARIaBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
+        T_DATA_TYPE_VARIABLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
         ;
 
 R_method_variable://пеменная или метод
@@ -739,9 +725,11 @@ R_method_variable://пеменная или метод
         |
         T_DATA_TYPE R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE_VARIaBLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
+        T_DATA_TYPE_VARIABLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
         |
         T_DATA_TYPE_METHOD T_IDENTIFIER R_defin_method//точно метод
+        |
+        T_IDENTIFIER R_defin_method
         ;
 
 R_method_or_var:
@@ -780,7 +768,6 @@ R_comma_next_var2://возможно присвоение
         T_ASSIGNMENT T_OPEN_BRACE R_ArgumentsCall T_CLOSE_BRACE
         ;
 
-//++++++++++++++++++++++++++++++++++++++++++++++++
 
 R_unary_sign:
         T_MINUS
@@ -792,15 +779,9 @@ R_unary_sign:
 
 R_Strings:
         T_STRING R_Repeat_square_bracket
-        // |
-        // R_Strings T_PLUS T_STRING
-        // |
-        // R_Strings T_PLUS T_IDENTIFIER
         ;
 
 R_Value:
-        //T_IDENTIFIER
-        //|
         T_NUMBER
         |
         R_Strings
@@ -813,7 +794,7 @@ R_Value:
 R_TypeField:
         T_DATA_TYPE
         |
-        T_DATA_TYPE_VARIaBLE
+        T_DATA_TYPE_VARIABLE
         |
         T_IDENTIFIER
         ;
@@ -842,6 +823,8 @@ R_ArgumentsCall:
         ;
 
 R_Expression:
+        T_OPEN_BRACKET R_TypeField T_CLOSE_BRACKET R_Expression
+        |
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET
         |
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET R_all_binary_sign R_next_Expression
@@ -857,7 +840,28 @@ R_Expression:
         T_NEW R_TypeField R_Repeat_square_bracket R_Call_methods
         |
         R_Expression T_QUERY R_Expression T_COLON R_Expression
+        |
+        R_this_super_block
+        ;
 
+R_this_super_block:
+        R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
+        |
+        R_this_super R_Call_methods
+        |
+        R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods R_all_binary_sign R_next_Expression
+        |
+        R_this_super R_Call_methods R_all_binary_sign R_next_Expression
+        |
+        R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods T_INCREMENT_DECREMENT_SIGN
+        |
+        R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods T_INCREMENT_DECREMENT_SIGN R_all_binary_sign R_next_Expression
+        ;
+
+R_this_super:
+        T_THIS
+        |
+        T_SUPER
         ;
 
 R_assignment_sign:
@@ -877,6 +881,10 @@ R_Call_methods:
         T_DOT T_IDENTIFIER R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
         |
         T_DOT T_IDENTIFIER R_Repeat_square_bracket R_Call_methods
+        |
+        T_DOT R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods
+        |
+        T_DOT R_this_super R_Call_methods
         ;
 
 R_variable:
@@ -909,6 +917,10 @@ R_sign:
         T_INCREMENT_DECREMENT_SIGN T_IDENTIFIER R_Repeat_square_bracket
         |
         T_INCREMENT_DECREMENT_SIGN T_IDENTIFIER R_Repeat_square_bracket R_all_binary_sign R_next_Expression
+        |
+        T_INCREMENT_DECREMENT_SIGN R_this_super_block
+        |
+        T_INCREMENT_DECREMENT_SIGN R_this_super_block R_all_binary_sign R_next_Expression
         ;
 
 R_next_Expression:
@@ -917,6 +929,8 @@ R_next_Expression:
         R_number
         |
         R_sign
+        |
+        T_OPEN_BRACKET R_TypeField T_CLOSE_BRACKET R_next_Expression
         |
         T_OPEN_BRACKET R_Expression T_CLOSE_BRACKET
         |
@@ -933,18 +947,34 @@ R_Command:
         |
         R_If
         |
+        R_Try
+        |
+        T_BREAK T_SEMICOLON
+        |
         T_ASSERT R_Expression T_SEMICOLON
         |
         T_ASSERT R_Expression T_COLON R_Expression T_SEMICOLON
         |
         T_RETURN R_Expression T_SEMICOLON
         |
-        T_TRY R_Body T_CATCH T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET R_Body
-        |
-        T_TRY R_Body T_CATCH T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET R_Body T_FINALLY R_Body
-        |
         T_THROW R_Expression T_SEMICOLON
         ;
+
+R_Try:
+        T_TRY R_Body R_Catch R_Finaly
+        ;
+
+R_Catch:
+        T_CATCH T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET R_Body
+        |
+        R_Catch T_CATCH T_OPEN_BRACKET R_Arguments T_CLOSE_BRACKET R_Body
+        ;
+
+R_Finaly:
+        |
+        T_FINALLY R_Body
+        ;
+
 
 R_If:
         T_IF T_OPEN_BRACKET R_Cond T_CLOSE_BRACKET R_Body

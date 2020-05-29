@@ -12,3 +12,11 @@ gitHub с Java лексером и парсером
 
 Документация java oracle
     https://docs.oracle.com/javase/specs/jls/se7/html/jls-0-index.html
+
+
+Не сделано, дадут пизды:
+
+-Комментарии
+-Аннотации
+-Анонимные классы
+-Templates
