@@ -1,81 +1,114 @@
-import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-public class Life {
-    public static void show(boolean[][] grid){
-        String s = "";
-        for(boolean[] row : grid){
-            for(boolean val : row)
-                if(val)
-                    s += "*";
-                else
-                    s += ".";
-            s += "\n";
-        }
-        System.out.println(s);
-    }
-    
-    public static boolean[][] gen(){
-        boolean[][] grid = new boolean[10][10];
-        for(int r = 0; r < 10; r++)
-            for(int c = 0; c < 10; c++)
-                if( Math.random() > 0.7 )
-                    grid[r][c] = true;
-        return grid;
-    }
-    
-    public static void main(String[] args){
-        boolean[][] world = gen();
-        show(world);
-        System.out.println();
-        world = nextGen(world);
-        show(world);
-        Scanner s = new Scanner(System.in);
-        while(s.nextLine().length() == 0){
-            System.out.println();
-            world = nextGen(world);
-            show(world);
-            
-        }
-    }
-    
-    public static boolean[][] nextGen(boolean[][] world){
-        boolean[][] newWorld 
-            = new boolean[world.length][world[0].length];
-        int num;
-        for(int r = 0; r < world.length; r++){
-            for(int c = 0; c < world[0].length; c++){
-                num = numNeighbors(world, r, c);
-                if( occupiedNext(num, world[r][c]) )
-                    newWorld[r][c] = true;
+
+public class FreqTableExampleOriginal {
+
+    public static final int NUM_ASCII_CHAR = 128;
+
+    public static void main(String[] args)
+        {
+
+        int[] freqs = createFreqTableURL("http://www.utexas.edu/");
+
+        if( freqs.length == 0)
+            System.out.println("No frequency table created due to problems when reading from file");
+        else{
+            for(int i = 0; i < NUM_ASCII_CHAR; i++){
+                System.out.println("charcater code: " + i + " ,character: " + (char)i + " ,frequency: " + freqs[i]);
             }
+            System.out.println("Total characters in file: " + sum(freqs));
         }
-        return newWorld;
-    }
-    
-    public static boolean occupiedNext(int numNeighbors, boolean occupied){
-        if( occupied && (numNeighbors == 2 || numNeighbors == 3))
-            return true;
-        else if (!occupied && numNeighbors == 3)
-            return true;
-        else
-            return false;
+
+
+        freqs = new int[]{};
+        try{
+            freqs = createTable("ciaFactBook2008.txt");
+        }
+        catch(FileNotFoundException e){
+            System.out.println("File not found. Unable to create freq table" + e);
+        }
+        catch(IOException e){
+            System.out.println("Problem while reading from file. Unable to create freq table" + e);
+        }
+        if( freqs.length == 0)
+            System.out.println("No frequency table created due to problems when reading from file");
+        else{
+            for(int i = 0; i < freqs.length; i++){
+                System.out.println("charcater code: " + i + " ,character: " + (char)i + " ,frequency: " + freqs[i]);
+            }
+            System.out.println("Total characters in file: " + sum(freqs));
+        }
+
     }
 
-    private static int numNeighbors(boolean[][] world, int row, int col) {
-        int num = world[row][col] ? -1 : 0;
-        for(int r = row - 1; r <= row + 1; r++)
-            for(int c = col - 1; c <= col + 1; c++)
-                if( inbounds(world, r, c) && world[r][c] )
-                    num++;
-
-        return num;
+    private static int sum(int[] list) {
+        assert list != null : "Failed precondition, sum: parameter list" +
+            " may not be null.";
+        int total = 0;
+        for(int x : list){
+            total += x;
+        }
+        return total;
     }
 
-    private static boolean inbounds(boolean[][] world, int r, int c) {
-        return r >= 0 && r < world.length && c >= 0 &&
-        c < world[0].length;
+    public static int[] createFreqTableURL (String url){
+        if(url == null)
+            throw new IllegalArgumentException("Violation of precondition. parameter url must not be null.");
+
+        int[] freqs = new int[NUM_ASCII_CHAR];
+        try {
+        URL inputURL = new URL(url);
+        InputStreamReader in
+            = new InputStreamReader(inputURL.openStream());
+
+        while(in.ready()){
+            int c = in.read();
+            if(0 <= c && c < freqs.length)
+                freqs[c]++;
+            else
+                System.out.println("Non ASCII char: " + c + " " + (char) c);
+        }
+        in.close();
+        }
+        catch(MalformedURLException e){
+            System.out.println("Bad URL.");
+            freqs = new int[0];
+        }
+        catch(IOException e){
+            System.out.println("Unable to read from resource." + e);
+            freqs = new int[0];
+        }
+        return freqs;
     }
-    
-    
-    
+
+
+    public static int[] createTable(String fileName) throws FileNotFoundException, IOException{
+        int[] freqs = new int[NUM_ASCII_CHAR];
+        File f = new File(fileName);
+        FileReader r = new FileReader(f);
+        while( r.ready() ){
+            int ch = r.read();
+            if(0 <= ch && ch < freqs.length)
+                freqs[ch]++;
+            else
+                System.out.println((char) ch);
+                
+        }
+        r.close();
+        return freqs;
+    }
+
+
+
+
+
+
+
+
 }

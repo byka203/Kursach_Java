@@ -20,7 +20,8 @@
 
 "public"|"private"|"protected"                      return T_ACCESS_MODIFIERS;
 
-"static"|"final"                                    return T_STATIC_FINAL_MODIFIERS;
+"static"                                            return T_STATIC_MODIFIERS;
+"final"                                             return T_FINAL_MODIFIERS;
 "abstract"                                          return T_ABSTRACT_MODIFIERS;
 "transient"                                         return T_TRANSIENT_MODIFIERS;
 "native"                                            return T_NATIVE_MODIFIERS;
