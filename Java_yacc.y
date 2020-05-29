@@ -102,8 +102,8 @@ R_Modifiers:
 
 
 //слой 1
-R_access://модификатор доступа может быть у классов, методов, переменных
-        R_method_variable//только модификатор доступа затем тип
+R_access:
+        R_method_variable
         |
         R_class_interface
         |
@@ -950,6 +950,8 @@ R_Command:
         R_Try
         |
         T_BREAK T_SEMICOLON
+        |
+        T_CONTINUE T_SEMICOLON
         |
         T_ASSERT R_Expression T_SEMICOLON
         |

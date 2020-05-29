@@ -20,3 +20,7 @@ gitHub с Java лексером и парсером
 -Аннотации
 -Анонимные классы
 -Templates
+-enum
+-synchronized|volatile
+-switch\case
+-instaceof

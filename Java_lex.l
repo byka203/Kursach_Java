@@ -53,7 +53,6 @@
 "break"                                             return T_BREAK;
 "continue"                                          return T_CONTINUE;
 
-
 "new"                                               return T_NEW;
 "super"                                             return T_SUPER;
 "this"                                              return T_THIS;
