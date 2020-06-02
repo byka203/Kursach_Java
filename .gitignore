@@ -2,3 +2,5 @@
 *.c
 *.h
 *Zone.Identifier
+
+test*
