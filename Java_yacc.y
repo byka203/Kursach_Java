@@ -21,7 +21,7 @@ int yywrap(){
 
 
 %start R_Programm
-%token T_STAR T_IMPORT T_PACKAGE T_CLASS T_INTERFACE T_DATA_TYPE T_DATA_TYPE_VARIABLE T_DATA_TYPE_METHOD T_ENUM T_ACCESS_MODIFIERS T_STATIC_MODIFIERS T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS T_TRANSIENT_MODIFIERS T_NATIVE_MODIFIERS T_STRICTFP_MODIFIERS T_STREAM_MODIFIERS T_EXTENDS T_IMPLEMENTS T_THROW T_TRUE_FALSE T_IF T_ELSE T_SWITCH T_CASE T_DEFAULT T_TRY T_CATCH T_THROWS T_FINALLY T_FOR T_DO T_WHILE T_BREAK T_CONTINUE T_NEW T_SUPER T_THIS T_ASSERT T_INSTACEOF T_RETURN T_INCREMENT_DECREMENT_SIGN T_UNARY_SIGN_ONLY T_COMPARISON_SIGN T_BINARY_SIGN T_ASSIGNMENT T_OPEN_BRACKET T_CLOSE_BRACKET T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET T_OPEN_BRACE T_CLOSE_BRACE T_SEMICOLON T_DOT T_COMMA T_QUERY T_COLON T_FLOAT T_STRING T_NUMBER T_IDENTIFIER T_MINUS T_PLUS T_ASSIGNMENT2
+%token T_PESIK T_OPEN_ANGLE_BRACKET T_CLOSE_ANGLE_BRACKET T_STAR T_IMPORT T_PACKAGE T_CLASS T_INTERFACE T_DATA_TYPE T_DATA_TYPE_VARIABLE T_DATA_TYPE_METHOD T_ENUM T_ACCESS_MODIFIERS T_STATIC_MODIFIERS T_FINAL_MODIFIERS T_ABSTRACT_MODIFIERS T_TRANSIENT_MODIFIERS T_NATIVE_MODIFIERS T_STRICTFP_MODIFIERS T_STREAM_MODIFIERS T_EXTENDS T_IMPLEMENTS T_THROW T_TRUE_FALSE T_IF T_ELSE T_SWITCH T_CASE T_DEFAULT T_TRY T_CATCH T_THROWS T_FINALLY T_FOR T_DO T_WHILE T_BREAK T_CONTINUE T_NEW T_SUPER T_THIS T_ASSERT T_INSTACEOF T_RETURN T_INCREMENT_DECREMENT_SIGN T_UNARY_SIGN_ONLY T_COMPARISON_SIGN T_BINARY_SIGN T_ASSIGNMENT T_OPEN_BRACKET T_CLOSE_BRACKET T_OPEN_SQUARE_BRACKET T_CLOSE_SQUARE_BRACKET T_OPEN_BRACE T_CLOSE_BRACE T_SEMICOLON T_DOT T_COMMA T_QUERY T_COLON T_FLOAT T_STRING T_NUMBER T_IDENTIFIER T_MINUS T_PLUS T_ASSIGNMENT2
 
 %%
 R_Programm:
@@ -41,7 +41,13 @@ R_Directives:
         ;
 
 R_Package:
-        T_PACKAGE T_IDENTIFIER
+        T_PACKAGE R_Package_name
+        ;
+
+R_Package_name:
+        T_IDENTIFIER
+        |
+        R_Package_name T_DOT T_IDENTIFIER
         ;
 
 R_NamePacket:
@@ -78,9 +84,24 @@ R_class_interface:
         T_INTERFACE T_IDENTIFIER R_BodyClass
         ;
 
+R_Modifiers:
+        R_Modifiers2
+        |
+        R_Annotation R_Modifiers2
+        ;
+
+R_Annotation:
+        T_PESIK T_IDENTIFIER
+        |
+        R_Annotation T_PESIK T_IDENTIFIER
+        |
+        T_PESIK T_IDENTIFIER T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
+        |
+        R_Annotation T_PESIK T_IDENTIFIER T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
+        ;
 
 //слой 0
-R_Modifiers:
+R_Modifiers2:
         R_method_variable
         |
         R_class_interface
@@ -721,15 +742,27 @@ R_defin_var1:
         ;
 
 R_method_variable://пеменная или метод
-        T_IDENTIFIER R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
+        T_IDENTIFIER R_template R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
+        T_DATA_TYPE R_template R_Repeat_square_bracket T_IDENTIFIER R_method_or_var//всё ещё не понятно переменная или метод
         |
-        T_DATA_TYPE_VARIABLE R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
+        T_DATA_TYPE_VARIABLE R_template R_Repeat_square_bracket T_IDENTIFIER R_defin_var//точно переменная
         |
-        T_DATA_TYPE_METHOD T_IDENTIFIER R_defin_method//точно метод
+        T_DATA_TYPE_METHOD R_template T_IDENTIFIER R_defin_method//точно метод
         |
-        T_IDENTIFIER R_defin_method
+        T_IDENTIFIER R_template R_defin_method
+        ;
+
+R_template:
+        |
+        T_OPEN_ANGLE_BRACKET R_many_identifier T_CLOSE_ANGLE_BRACKET
+        ;
+
+R_many_identifier:
+        |
+        R_TypeField
+        |
+        R_many_identifier T_COMMA R_TypeField
         ;
 
 R_method_or_var:
@@ -801,9 +834,9 @@ R_TypeField:
 
 R_Arguments:
         |
-        R_Arguments T_COMMA R_TypeField R_Repeat_square_bracket T_IDENTIFIER
+        R_Arguments T_COMMA R_TypeField R_template R_Repeat_square_bracket T_IDENTIFIER
         |
-        R_TypeField R_Repeat_square_bracket T_IDENTIFIER
+        R_TypeField R_template R_Repeat_square_bracket T_IDENTIFIER
         ;
 
 R_Body_Method:
@@ -835,13 +868,13 @@ R_Expression:
         |
         R_sign
         |
-        T_NEW R_TypeField R_Repeat_square_bracket R_Call_methods T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
+        T_NEW R_TypeField R_template R_Repeat_square_bracket R_Call_methods T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET
         |
-        T_NEW R_TypeField R_Repeat_square_bracket R_Call_methods
+        T_NEW R_TypeField R_template R_Repeat_square_bracket R_Call_methods
         |
         R_Expression T_QUERY R_Expression T_COLON R_Expression
         |
-        R_this_super_block
+        R_this_super_block R_can_assigment
         ;
 
 R_this_super_block:
@@ -858,10 +891,17 @@ R_this_super_block:
         R_this_super R_Repeat_bracket R_Repeat_square_bracket R_Call_methods T_INCREMENT_DECREMENT_SIGN R_all_binary_sign R_next_Expression
         ;
 
+R_can_assigment:
+        |
+        R_assignment_sign R_Expression
+        ;
+
 R_this_super:
         T_THIS
         |
         T_SUPER
+        |
+        T_CLASS
         ;
 
 R_assignment_sign:
@@ -1032,6 +1072,10 @@ R_binary_sign:
 
 R_comparison_sign:
         T_COMPARISON_SIGN
+        |
+        T_CLOSE_ANGLE_BRACKET
+        |
+        T_OPEN_ANGLE_BRACKET
         ;
 
 R_BodyClass:

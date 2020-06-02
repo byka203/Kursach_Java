@@ -6,6 +6,9 @@
 %}
 
 %%
+\/\/.*                                              ;
+\/\*(.*\n*)*\*\/                                    ;
+
 "import"                                            return T_IMPORT;
 "package"                                           return T_PACKAGE;
 
@@ -61,11 +64,15 @@
 "instaceof"                                         return T_INSTACEOF;
 "return"                                            return T_RETURN;
 
+"@"                                                 return T_PESIK;
+
 "++"|"--"                                           return T_INCREMENT_DECREMENT_SIGN;
 "~"|"!"                                             return T_UNARY_SIGN_ONLY;
 "-"                                                 return T_MINUS;
 "+"                                                 return T_PLUS;
-"=="|"!="|">="|"<="|">"|"<"                         return T_COMPARISON_SIGN;
+"=="|"!="|">="|"<="                                 return T_COMPARISON_SIGN;
+">"                                                 return T_CLOSE_ANGLE_BRACKET;
+"<"                                                 return T_OPEN_ANGLE_BRACKET;
 "/"|"%"|"&"|"|"|"^"|"<<"|">>"|">>>"|"&&"|"||"       return T_BINARY_SIGN;
 "*"                                                 return T_STAR;
 "="                                                 return T_ASSIGNMENT;
@@ -85,6 +92,8 @@
 ":"                                                 return T_COLON;
 
 \"([^"]|\\.)*\"                                     return T_STRING;
+
+
 
 [0-9]+"."[0-9]+"f"                                  return T_FLOAT;
 [0-9]+"."[0-9]+                                     return T_FLOAT;
