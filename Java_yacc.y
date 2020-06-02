@@ -82,6 +82,8 @@ R_class_interface:
         T_CLASS T_IDENTIFIER R_EXTENDS R_IMPLEMENTS R_BodyClass
         |
         T_INTERFACE T_IDENTIFIER R_BodyClass
+        |
+        T_ENUM T_IDENTIFIER T_OPEN_BRACE R_BodyEnum T_CLOSE_BRACE
         ;
 
 R_Modifiers:
@@ -1085,6 +1087,19 @@ R_BodyClass:
 R_BodyClass2:
         |
         R_BodyClass2 R_Modifiers
+        ;
+
+R_BodyEnum:
+         R_BodyEnum2 R_BodyEnum3 R_BodyClass2
+         ;
+
+R_BodyEnum3:
+        T_IDENTIFIER T_OPEN_BRACKET R_Value T_COMMA T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET T_MINUS T_CLOSE_ANGLE_BRACKET R_Expression T_CLOSE_BRACKET T_SEMICOLON
+        ;
+
+R_BodyEnum2:
+        |
+        R_BodyEnum2 T_IDENTIFIER T_OPEN_BRACKET R_Value T_COMMA T_OPEN_BRACKET R_ArgumentsCall T_CLOSE_BRACKET T_MINUS T_CLOSE_ANGLE_BRACKET R_Expression T_CLOSE_BRACKET T_COMMA
         ;
 
 %%
